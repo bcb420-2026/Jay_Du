@@ -1,0 +1,52 @@
+---
+title: "Homework_Docker"
+output: html_document
+---
+
+## Load Dependencies
+
+```{r}
+
+library("DESeq2")
+library("pheatmap")
+library("enrichplot")
+
+```
+
+# Create Matrix
+
+```{r}
+mat <- matrix(sample(1:100, 50, replace = TRUE), nrow = 5, ncol = 10)
+
+# Define column names
+colnames(mat) <- c(paste0("cond", 1:5), paste0("ctrl", 1:5))
+
+# Define row names
+rownames(mat) <- paste0("gene", 1:5)
+
+mat
+```
+
+# Compute fold change
+
+```{r}
+# Separate condition and control columns
+
+cond_means <- rowMeans(mat[, 1:5])
+ctrl_means <- rowMeans(mat[, 6:10])
+
+fold_change <- cond_means / ctrl_means
+
+# Create fold change(fc) results table
+
+fc_results <- data.frame(
+Gene = rownames(mat),
+Condition_Mean = cond_means,
+Control_Mean = ctrl_means,
+Fold_Change = fold_change
+)
+
+fc_results
+```
+
+
