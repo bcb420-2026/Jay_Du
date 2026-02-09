@@ -11,6 +11,104 @@ Using **GSE119732**, confirm whether the ID column contains Ensembl IDs with ver
 3. Create a new column with versions stripped.
 4. Map the identifiers to HGNC symbols.
 
+```{r}
+# Helper functions
+
+# Safe Read files
+safe_read <- function(file) {
+  # First attempt: read as TSV
+  df <- tryCatch(
+    readr::read_tsv(file, show_col_types = FALSE),
+    error = function(e) NULL   # catch fatal errors
+  )
+  
+  # If read_tsv failed entirely:
+  if (is.null(df)) {
+    message("TSV read failed — reading as space-delimited file instead.")
+    return(readr::read_table(file, show_col_types = FALSE))
+  }
+  
+  # If read_tsv returned but with parsing issues:
+  probs <- problems(df)
+  if (nrow(probs) > 0) {
+    message("Parsing issues detected in TSV — reading as space-delimited file instead.")
+    return(readr::read_table(file, show_col_types = FALSE))
+  }
+  
+  # If everything was fine:
+  return(df)
+}
+
+# Strip version number
+strip_ensembl_version <- function(ids) sub("\\..*$", "", ids)
+
+```
+
+
+### 1. 
+```{r}
+gse <- "GSE119732"
+pattern <- "GSE119732.*\\.gz"
+
+source("./fetch_geo_supp.R")
+fetch_geo_supp(gse = gse)
+
+path <- file.path("data", gse)
+files <- list.files(path, pattern = pattern, 
+                    full.names = TRUE, recursive = TRUE)
+
+kable_head(tibble(file = basename(files)), min(10, length(files)), paste(gse,": extracted file list (first 10)"))
+
+x <- safe_read(files[1])
+
+kable_head(x[, 1:min(6, ncol(x))], 20, paste(gse,": raw table preview"))
+
+```
+
+### 2.
+
+All 20 from the 1st 20 have a ".", all 58037 ids of this whole set
+have a ".".
+
+
+### 3. 
+
+```{r}
+
+# Apply to your tibble 'x'
+id_col <- names(x)[1]
+ids <- x[[1]] |> as.character()
+kable_head(tibble(raw_id = head(ids, 10), 
+                  stripped = strip_ensembl_version(head(ids, 10))), 
+           10, paste(gse,": ID preview"))
+
+```
+### 4.
+```{r}
+if (any(grepl("^ENSG", strip_ensembl_version(ids)))) {
+  library(biomaRt)
+  ensembl_ids <- unique(strip_ensembl_version(ids))
+  ensembl <- useMart("ensembl", dataset = "hsapiens_gene_ensembl")
+  
+  map <- getBM(
+    attributes = c("ensembl_gene_id", "hgnc_symbol"),
+    filters = "ensembl_gene_id",
+    values = ensembl_ids,
+    mart = ensembl
+  )
+  
+  kable_head(map, 10, paste(gse,": mapping preview"))
+  
+  expr_mapped <- x %>%
+    mutate(ensembl_gene_id = strip_ensembl_version(.data[[id_col]])) %>%
+    left_join(map, by = "ensembl_gene_id") %>%
+    dplyr::select( ensembl_gene_id,hgnc_symbol, everything())
+  
+  
+  kable_head(expr_mapped[, 1:min(8, ncol(expr_mapped))], 5, paste(gse,": mapped table preview"))
+}
+```
+
 ## Exercise 2 — https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE122380
 
 Using **GSE122380**, confirm whether the ID column contains Ensembl IDs with version suffixes.
@@ -20,6 +118,79 @@ Using **GSE122380**, confirm whether the ID column contains Ensembl IDs with ver
 3. Map the identifiers to HGNC symbols.
 4. What is different about this file? 
 
+
+
+### 1. 
+```{r}
+gse <- "GSE122380"
+pattern <- "GSE122380.*\\.gz"
+
+source("./fetch_geo_supp.R")
+fetch_geo_supp(gse = gse)
+
+path <- file.path("data", gse)
+files <- list.files(path, pattern = pattern, 
+                    full.names = TRUE, recursive = TRUE)
+
+kable_head(tibble(file = basename(files)), min(10, length(files)), paste(gse,": extracted file list (first 10)"))
+
+x <- safe_read(files[1])
+
+kable_head(x[, 1:min(6, ncol(x))], 20, paste(gse,": raw table preview"))
+
+```
+
+### 2.
+
+0 from the 1st 20 have a ".", all ids of this whole set
+dpn't have a ".".
+
+
+### 3. 
+
+```{r}
+
+# Define the ID column name
+id_col <- names(x)[1]
+ids <- x[[1]] |> as.character()
+
+# Since IDs don't have dots, we use them directly
+if (any(grepl("^ENSG", ids))) {
+  library(biomaRt)
+  library(dplyr)
+  
+  ensembl_ids <- unique(ids)
+  ensembl <- useMart("ensembl", dataset = "hsapiens_gene_ensembl")
+  
+  # Fetch the mapping
+  map <- getBM(
+    attributes = c("ensembl_gene_id", "hgnc_symbol"),
+    filters = "ensembl_gene_id",
+    values = ensembl_ids,
+    mart = ensembl
+  )
+  
+  kable_head(map, 10, paste(gse, ": mapping preview (cleaned)"))
+  
+  # Join using the original IDs directly
+  expr_mapped <- x %>%
+    mutate(ensembl_gene_id = .data[[id_col]]) %>%
+    left_join(map, by = "ensembl_gene_id") %>%
+    dplyr::select(ensembl_gene_id,hgnc_symbol, everything())
+  
+  # Preview the final table
+  kable_head(expr_mapped[, 1:min(8, ncol(expr_mapped))], 10, paste(gse, ": mapped table preview"))
+}
+
+```
+### 4.
+GSE122380 uses stable Ensembl IDs without version suffixes, whereas your previous file used versioned IDs (e.g., .5) that required stripping, which made is simpler to map to HGNC.
+
+
 ## Exercise 3 - 
  
 Can you use the worked example to process the above two GEO records?  How?
+
+Yes — you can process both GEO records using the exact same workflow but with
+minor change in variables and remove the stripping version number step if not
+needed

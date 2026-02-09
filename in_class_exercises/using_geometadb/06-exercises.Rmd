@@ -17,3 +17,32 @@ In this exercise, you'll retrieve metadata for the following GEO Series and answ
 > Hint: Sample labels are not standardized. Use robust keyword detection (e.g., `control|normal|healthy|wild[- ]?type` vs. `tumou?r|cancer|patient|disease|mutant|treated`). Inspect a few GSM rows if the automatic inference is uncertain.
 
 
+**Summary of Findings per GSE:**
+
+- **GSE201427**  
+  - Type: High-throughput sequencing (RNA-seq)  
+  - Organism/Disease: Human pancreatic ductal adenocarcinoma (PDAC) cell line (Panc1) under hypoxia. SF3B1 splicing factor knockdown was used to study its role in HIF1α-mediated gene expression and glycolysis.
+  - Samples: 8 total (control vs SF3B1 knockdown)
+  - Control vs Disease: 5 controls, 3 disease
+
+- **GSE166530**  
+  - Type: High-throughput sequencing (RNA-seq)   
+  - Organism/Disease: Human COVID‑19 infection vs. control, focusing on transcriptional changes related to immune response and viral pathogenesis.
+  - Samples: 41 total 
+  - Control vs Disease: 5 controls, 36 disease
+
+- **GSE162183**  
+  - Type: Single‑cell expression profiling by high‑throughput sequencing (scRNA‑seq)
+  - Organism/Disease: Human psoriasis. Lesional skin from psoriasis patients compared to healthy donor skin to identify immune and inflammatory cell populations.  
+  - Samples: 6 (3 patients, 3 healthy donors) (scRNA‑seq)
+  - Control vs Disease: 3 controls, 3 disease
+
+- **GSE186458**  
+  - Type: Whole-genome bisulfite sequencing (DNA methylation)   
+  - Organism/Disease: Healthy human tissues. Atlas of DNA methylation across 39 cell types to map epigenetic regulation; no disease model.  
+  - Samples: 253 total
+  - Control vs Disease: all 205 samples healthy
+
+  **GSE264108**  
+    No, not via GEOmetadb, because it is not present in the SQLite snapshot.
+    However, it is available on [GEO](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE264108)
