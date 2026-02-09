@@ -11,10 +11,15 @@ Using **GSE119732**, confirm whether the ID column contains Ensembl IDs with ver
 3. Create a new column with versions stripped.
 4. Map the identifiers to HGNC symbols.
 
-```{r}
-# Helper functions
+### Helper functions
 
-# Safe Read files
+```{r}
+# Print first n from head
+kable_head <- function(x, n = 5, caption = NULL) {
+  knitr::kable(utils::head(x, n), caption = caption)
+}
+
+# Safe read files
 safe_read <- function(file) {
   # First attempt: read as TSV
   df <- tryCatch(
@@ -42,6 +47,9 @@ safe_read <- function(file) {
 # Strip version number
 strip_ensembl_version <- function(ids) sub("\\..*$", "", ids)
 
+
+# Load fetching function
+source("./fetch_geo_supp.R")
 ```
 
 
@@ -49,8 +57,6 @@ strip_ensembl_version <- function(ids) sub("\\..*$", "", ids)
 ```{r}
 gse <- "GSE119732"
 pattern <- "GSE119732.*\\.gz"
-
-source("./fetch_geo_supp.R")
 fetch_geo_supp(gse = gse)
 
 path <- file.path("data", gse)
@@ -65,14 +71,26 @@ kable_head(x[, 1:min(6, ncol(x))], 20, paste(gse,": raw table preview"))
 
 ```
 
+
 ### 2.
+```{r}
+# Extract the first 20 IDs
+first_20_ids <- head(x$gene_id, 20)
+
+# Count how many of the first 20 contain a "."
+dot_count <- sum(grepl("\\.", first_20_ids))
+print(paste("Number of IDs with version suffixes in first 20:", dot_count))
+
+# Count how many total contain a "."
+dot_count <- sum(grepl("\\.", x$gene_id))
+print(paste("Total number of IDs with version suffixes:", dot_count))
+```
 
 All 20 from the 1st 20 have a ".", all 58037 ids of this whole set
 have a ".".
 
 
 ### 3. 
-
 ```{r}
 
 # Apply to your tibble 'x'
@@ -83,6 +101,8 @@ kable_head(tibble(raw_id = head(ids, 10),
            10, paste(gse,": ID preview"))
 
 ```
+
+
 ### 4.
 ```{r}
 if (any(grepl("^ENSG", strip_ensembl_version(ids)))) {
@@ -119,7 +139,6 @@ Using **GSE122380**, confirm whether the ID column contains Ensembl IDs with ver
 4. What is different about this file? 
 
 
-
 ### 1. 
 ```{r}
 gse <- "GSE122380"
@@ -140,14 +159,26 @@ kable_head(x[, 1:min(6, ncol(x))], 20, paste(gse,": raw table preview"))
 
 ```
 
+
 ### 2.
+```{r}
+# Extract the first 20 IDs
+first_20_ids <- head(x$gene_id, 20)
+
+# Count how many of the first 20 contain a "."
+dot_count <- sum(grepl("\\.", first_20_ids))
+print(paste("Number of IDs with version suffixes in first 20:", dot_count))
+
+# Count how many total contain a "."
+dot_count <- sum(grepl("\\.", x$gene_id))
+print(paste("Total number of IDs with version suffixes:", dot_count))
+```
 
 0 from the 1st 20 have a ".", all ids of this whole set
 dpn't have a ".".
 
 
 ### 3. 
-
 ```{r}
 
 # Define the ID column name
@@ -183,6 +214,8 @@ if (any(grepl("^ENSG", ids))) {
 }
 
 ```
+
+
 ### 4.
 GSE122380 uses stable Ensembl IDs without version suffixes, whereas your previous file used versioned IDs (e.g., .5) that required stripping, which made is simpler to map to HGNC.
 
@@ -193,4 +226,4 @@ Can you use the worked example to process the above two GEO records?  How?
 
 Yes — you can process both GEO records using the exact same workflow but with
 minor change in variables and remove the stripping version number step if not
-needed
+needed.
