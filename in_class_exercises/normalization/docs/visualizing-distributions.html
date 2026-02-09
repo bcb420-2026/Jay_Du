@@ -185,8 +185,19 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 <li class="chapter" data-level="6" data-path="exercises.html"><a href="exercises.html"><i class="fa fa-check"></i><b>6</b> Exercises</a>
 <ul>
-<li class="chapter" data-level="6.1" data-path="exercises.html"><a href="exercises.html#exercise-1-httpswww.ncbi.nlm.nih.govgeoqueryacc.cgiaccgse119732"><i class="fa fa-check"></i><b>6.1</b> Exercise 1 — https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE119732</a></li>
-<li class="chapter" data-level="6.2" data-path="exercises.html"><a href="exercises.html#exercise-2-httpswww.ncbi.nlm.nih.govgeoqueryacc.cgiaccgse122380"><i class="fa fa-check"></i><b>6.2</b> Exercise 2 — https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE122380</a></li>
+<li class="chapter" data-level="6.1" data-path="exercises.html"><a href="exercises.html#exercise-1-httpswww.ncbi.nlm.nih.govgeoqueryacc.cgiaccgse119732"><i class="fa fa-check"></i><b>6.1</b> Exercise 1 — https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE119732</a>
+<ul>
+<li class="chapter" data-level="6.1.1" data-path="exercises.html"><a href="exercises.html#helper-functions"><i class="fa fa-check"></i><b>6.1.1</b> Helper functions</a></li>
+<li class="chapter" data-level="6.1.2" data-path="exercises.html"><a href="exercises.html#question-1"><i class="fa fa-check"></i><b>6.1.2</b> Question 1</a></li>
+<li class="chapter" data-level="6.1.3" data-path="exercises.html"><a href="exercises.html#question-2"><i class="fa fa-check"></i><b>6.1.3</b> Question 2</a></li>
+<li class="chapter" data-level="6.1.4" data-path="exercises.html"><a href="exercises.html#question-2-1"><i class="fa fa-check"></i><b>6.1.4</b> Question 2</a></li>
+</ul></li>
+<li class="chapter" data-level="6.2" data-path="exercises.html"><a href="exercises.html#exercise-2-httpswww.ncbi.nlm.nih.govgeoqueryacc.cgiaccgse122380"><i class="fa fa-check"></i><b>6.2</b> Exercise 2 — https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE122380</a>
+<ul>
+<li class="chapter" data-level="6.2.1" data-path="exercises.html"><a href="exercises.html#question-1-1"><i class="fa fa-check"></i><b>6.2.1</b> Question 1</a></li>
+<li class="chapter" data-level="6.2.2" data-path="exercises.html"><a href="exercises.html#question-2-2"><i class="fa fa-check"></i><b>6.2.2</b> Question 2</a></li>
+<li class="chapter" data-level="6.2.3" data-path="exercises.html"><a href="exercises.html#question-2-3"><i class="fa fa-check"></i><b>6.2.3</b> Question 2</a></li>
+</ul></li>
 <li class="chapter" data-level="6.3" data-path="exercises.html"><a href="exercises.html#exercise-3--"><i class="fa fa-check"></i><b>6.3</b> Exercise 3 -</a></li>
 </ul></li>
 </ul>
@@ -281,42 +292,43 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb23-3"><a href="visualizing-distributions.html#cb23-3" tabindex="-1"></a>gse <span class="ot">&lt;-</span> <span class="st">&quot;GSE119732&quot;</span></span>
 <span id="cb23-4"><a href="visualizing-distributions.html#cb23-4" tabindex="-1"></a></span>
 <span id="cb23-5"><a href="visualizing-distributions.html#cb23-5" tabindex="-1"></a><span class="fu">source</span>(<span class="st">&quot;./supp_functions.R&quot;</span>)</span>
-<span id="cb23-6"><a href="visualizing-distributions.html#cb23-6" tabindex="-1"></a><span class="fu">fetch_geo_supp</span>(<span class="at">gse =</span> gse)</span>
-<span id="cb23-7"><a href="visualizing-distributions.html#cb23-7" tabindex="-1"></a></span>
-<span id="cb23-8"><a href="visualizing-distributions.html#cb23-8" tabindex="-1"></a>path <span class="ot">&lt;-</span> <span class="fu">file.path</span>(<span class="st">&quot;data&quot;</span>, gse)</span>
-<span id="cb23-9"><a href="visualizing-distributions.html#cb23-9" tabindex="-1"></a>files <span class="ot">&lt;-</span> <span class="fu">list.files</span>(path, <span class="at">pattern =</span> <span class="st">&quot;</span><span class="sc">\\</span><span class="st">.txt.gz$|</span><span class="sc">\\</span><span class="st">.tsv.gz$|</span><span class="sc">\\</span><span class="st">.csv.gz$&quot;</span>, </span>
-<span id="cb23-10"><a href="visualizing-distributions.html#cb23-10" tabindex="-1"></a>                    <span class="at">full.names =</span> <span class="cn">TRUE</span>, <span class="at">recursive =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<span id="cb23-6"><a href="visualizing-distributions.html#cb23-6" tabindex="-1"></a><span class="fu">fetch_geo_supp</span>(<span class="at">gse =</span> gse)</span></code></pre></div>
+<pre><code>## Using locally cached version of supplementary file(s) GSE119732 found here:
+## data/GSE119732/GSE119732_count_table_RNA_seq.txt.gz</code></pre>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="visualizing-distributions.html#cb25-1" tabindex="-1"></a>path <span class="ot">&lt;-</span> <span class="fu">file.path</span>(<span class="st">&quot;data&quot;</span>, gse)</span>
+<span id="cb25-2"><a href="visualizing-distributions.html#cb25-2" tabindex="-1"></a>files <span class="ot">&lt;-</span> <span class="fu">list.files</span>(path, <span class="at">pattern =</span> <span class="st">&quot;</span><span class="sc">\\</span><span class="st">.txt.gz$|</span><span class="sc">\\</span><span class="st">.tsv.gz$|</span><span class="sc">\\</span><span class="st">.csv.gz$&quot;</span>, </span>
+<span id="cb25-3"><a href="visualizing-distributions.html#cb25-3" tabindex="-1"></a>                    <span class="at">full.names =</span> <span class="cn">TRUE</span>, <span class="at">recursive =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
 <p>Raw table preview</p>
-<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="visualizing-distributions.html#cb24-1" tabindex="-1"></a><span class="fu">library</span>(readr)</span>
-<span id="cb24-2"><a href="visualizing-distributions.html#cb24-2" tabindex="-1"></a></span>
-<span id="cb24-3"><a href="visualizing-distributions.html#cb24-3" tabindex="-1"></a>safe_read <span class="ot">&lt;-</span> <span class="cf">function</span>(file) {</span>
-<span id="cb24-4"><a href="visualizing-distributions.html#cb24-4" tabindex="-1"></a>  <span class="co"># First attempt: read as TSV</span></span>
-<span id="cb24-5"><a href="visualizing-distributions.html#cb24-5" tabindex="-1"></a>  df <span class="ot">&lt;-</span> <span class="fu">tryCatch</span>(</span>
-<span id="cb24-6"><a href="visualizing-distributions.html#cb24-6" tabindex="-1"></a>    readr<span class="sc">::</span><span class="fu">read_tsv</span>(file, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>),</span>
-<span id="cb24-7"><a href="visualizing-distributions.html#cb24-7" tabindex="-1"></a>    <span class="at">error =</span> <span class="cf">function</span>(e) <span class="cn">NULL</span>   <span class="co"># catch fatal errors</span></span>
-<span id="cb24-8"><a href="visualizing-distributions.html#cb24-8" tabindex="-1"></a>  )</span>
-<span id="cb24-9"><a href="visualizing-distributions.html#cb24-9" tabindex="-1"></a>  </span>
-<span id="cb24-10"><a href="visualizing-distributions.html#cb24-10" tabindex="-1"></a>  <span class="co"># If read_tsv failed entirely:</span></span>
-<span id="cb24-11"><a href="visualizing-distributions.html#cb24-11" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.null</span>(df)) {</span>
-<span id="cb24-12"><a href="visualizing-distributions.html#cb24-12" tabindex="-1"></a>    <span class="fu">message</span>(<span class="st">&quot;TSV read failed — reading as space-delimited file instead.&quot;</span>)</span>
-<span id="cb24-13"><a href="visualizing-distributions.html#cb24-13" tabindex="-1"></a>    <span class="fu">return</span>(readr<span class="sc">::</span><span class="fu">read_table</span>(file, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>))</span>
-<span id="cb24-14"><a href="visualizing-distributions.html#cb24-14" tabindex="-1"></a>  }</span>
-<span id="cb24-15"><a href="visualizing-distributions.html#cb24-15" tabindex="-1"></a>  </span>
-<span id="cb24-16"><a href="visualizing-distributions.html#cb24-16" tabindex="-1"></a>  <span class="co"># If read_tsv returned but with parsing issues:</span></span>
-<span id="cb24-17"><a href="visualizing-distributions.html#cb24-17" tabindex="-1"></a>  probs <span class="ot">&lt;-</span> <span class="fu">problems</span>(df)</span>
-<span id="cb24-18"><a href="visualizing-distributions.html#cb24-18" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">nrow</span>(probs) <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
-<span id="cb24-19"><a href="visualizing-distributions.html#cb24-19" tabindex="-1"></a>    <span class="fu">message</span>(<span class="st">&quot;Parsing issues detected in TSV — reading as space-delimited file instead.&quot;</span>)</span>
-<span id="cb24-20"><a href="visualizing-distributions.html#cb24-20" tabindex="-1"></a>    <span class="fu">return</span>(readr<span class="sc">::</span><span class="fu">read_table</span>(file, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>))</span>
-<span id="cb24-21"><a href="visualizing-distributions.html#cb24-21" tabindex="-1"></a>  }</span>
-<span id="cb24-22"><a href="visualizing-distributions.html#cb24-22" tabindex="-1"></a>  </span>
-<span id="cb24-23"><a href="visualizing-distributions.html#cb24-23" tabindex="-1"></a>  <span class="co"># If everything was fine:</span></span>
-<span id="cb24-24"><a href="visualizing-distributions.html#cb24-24" tabindex="-1"></a>  <span class="fu">return</span>(df)</span>
-<span id="cb24-25"><a href="visualizing-distributions.html#cb24-25" tabindex="-1"></a>}</span>
-<span id="cb24-26"><a href="visualizing-distributions.html#cb24-26" tabindex="-1"></a></span>
-<span id="cb24-27"><a href="visualizing-distributions.html#cb24-27" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">safe_read</span>(files[<span class="dv">1</span>])</span>
-<span id="cb24-28"><a href="visualizing-distributions.html#cb24-28" tabindex="-1"></a></span>
-<span id="cb24-29"><a href="visualizing-distributions.html#cb24-29" tabindex="-1"></a></span>
-<span id="cb24-30"><a href="visualizing-distributions.html#cb24-30" tabindex="-1"></a><span class="fu">kable_head</span>(x[, <span class="dv">1</span><span class="sc">:</span><span class="fu">min</span>(<span class="dv">6</span>, <span class="fu">ncol</span>(x))], <span class="dv">5</span>, <span class="fu">paste</span>(gse,<span class="st">&quot;: raw table preview&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="visualizing-distributions.html#cb26-1" tabindex="-1"></a><span class="fu">library</span>(readr)</span>
+<span id="cb26-2"><a href="visualizing-distributions.html#cb26-2" tabindex="-1"></a></span>
+<span id="cb26-3"><a href="visualizing-distributions.html#cb26-3" tabindex="-1"></a>safe_read <span class="ot">&lt;-</span> <span class="cf">function</span>(file) {</span>
+<span id="cb26-4"><a href="visualizing-distributions.html#cb26-4" tabindex="-1"></a>  <span class="co"># First attempt: read as TSV</span></span>
+<span id="cb26-5"><a href="visualizing-distributions.html#cb26-5" tabindex="-1"></a>  df <span class="ot">&lt;-</span> <span class="fu">tryCatch</span>(</span>
+<span id="cb26-6"><a href="visualizing-distributions.html#cb26-6" tabindex="-1"></a>    readr<span class="sc">::</span><span class="fu">read_tsv</span>(file, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>),</span>
+<span id="cb26-7"><a href="visualizing-distributions.html#cb26-7" tabindex="-1"></a>    <span class="at">error =</span> <span class="cf">function</span>(e) <span class="cn">NULL</span>   <span class="co"># catch fatal errors</span></span>
+<span id="cb26-8"><a href="visualizing-distributions.html#cb26-8" tabindex="-1"></a>  )</span>
+<span id="cb26-9"><a href="visualizing-distributions.html#cb26-9" tabindex="-1"></a>  </span>
+<span id="cb26-10"><a href="visualizing-distributions.html#cb26-10" tabindex="-1"></a>  <span class="co"># If read_tsv failed entirely:</span></span>
+<span id="cb26-11"><a href="visualizing-distributions.html#cb26-11" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.null</span>(df)) {</span>
+<span id="cb26-12"><a href="visualizing-distributions.html#cb26-12" tabindex="-1"></a>    <span class="fu">message</span>(<span class="st">&quot;TSV read failed — reading as space-delimited file instead.&quot;</span>)</span>
+<span id="cb26-13"><a href="visualizing-distributions.html#cb26-13" tabindex="-1"></a>    <span class="fu">return</span>(readr<span class="sc">::</span><span class="fu">read_table</span>(file, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>))</span>
+<span id="cb26-14"><a href="visualizing-distributions.html#cb26-14" tabindex="-1"></a>  }</span>
+<span id="cb26-15"><a href="visualizing-distributions.html#cb26-15" tabindex="-1"></a>  </span>
+<span id="cb26-16"><a href="visualizing-distributions.html#cb26-16" tabindex="-1"></a>  <span class="co"># If read_tsv returned but with parsing issues:</span></span>
+<span id="cb26-17"><a href="visualizing-distributions.html#cb26-17" tabindex="-1"></a>  probs <span class="ot">&lt;-</span> <span class="fu">problems</span>(df)</span>
+<span id="cb26-18"><a href="visualizing-distributions.html#cb26-18" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">nrow</span>(probs) <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb26-19"><a href="visualizing-distributions.html#cb26-19" tabindex="-1"></a>    <span class="fu">message</span>(<span class="st">&quot;Parsing issues detected in TSV — reading as space-delimited file instead.&quot;</span>)</span>
+<span id="cb26-20"><a href="visualizing-distributions.html#cb26-20" tabindex="-1"></a>    <span class="fu">return</span>(readr<span class="sc">::</span><span class="fu">read_table</span>(file, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>))</span>
+<span id="cb26-21"><a href="visualizing-distributions.html#cb26-21" tabindex="-1"></a>  }</span>
+<span id="cb26-22"><a href="visualizing-distributions.html#cb26-22" tabindex="-1"></a>  </span>
+<span id="cb26-23"><a href="visualizing-distributions.html#cb26-23" tabindex="-1"></a>  <span class="co"># If everything was fine:</span></span>
+<span id="cb26-24"><a href="visualizing-distributions.html#cb26-24" tabindex="-1"></a>  <span class="fu">return</span>(df)</span>
+<span id="cb26-25"><a href="visualizing-distributions.html#cb26-25" tabindex="-1"></a>}</span>
+<span id="cb26-26"><a href="visualizing-distributions.html#cb26-26" tabindex="-1"></a></span>
+<span id="cb26-27"><a href="visualizing-distributions.html#cb26-27" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">safe_read</span>(files[<span class="dv">1</span>])</span>
+<span id="cb26-28"><a href="visualizing-distributions.html#cb26-28" tabindex="-1"></a></span>
+<span id="cb26-29"><a href="visualizing-distributions.html#cb26-29" tabindex="-1"></a></span>
+<span id="cb26-30"><a href="visualizing-distributions.html#cb26-30" tabindex="-1"></a><span class="fu">kable_head</span>(x[, <span class="dv">1</span><span class="sc">:</span><span class="fu">min</span>(<span class="dv">6</span>, <span class="fu">ncol</span>(x))], <span class="dv">5</span>, <span class="fu">paste</span>(gse,<span class="st">&quot;: raw table preview&quot;</span>))</span></code></pre></div>
 <table>
 <caption>(#tab:preview_raw)GSE119732 : raw table preview</caption>
 <thead>
@@ -375,43 +387,43 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <div id="boxplots" class="section level2 hasAnchor" number="3.2">
 <h2><span class="header-section-number">3.2</span> Boxplots<a href="visualizing-distributions.html#boxplots" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="visualizing-distributions.html#cb25-1" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb25-2"><a href="visualizing-distributions.html#cb25-2" tabindex="-1"></a></span>
-<span id="cb25-3"><a href="visualizing-distributions.html#cb25-3" tabindex="-1"></a><span class="co"># suppose &#39;mat&#39; is a gene x sample matrix (numeric)</span></span>
-<span id="cb25-4"><a href="visualizing-distributions.html#cb25-4" tabindex="-1"></a>plot_box <span class="ot">&lt;-</span> <span class="cf">function</span>(mat, <span class="at">main =</span> <span class="st">&quot;&quot;</span>, <span class="at">ylab =</span> <span class="st">&quot;log2(counts+1)&quot;</span>) {</span>
-<span id="cb25-5"><a href="visualizing-distributions.html#cb25-5" tabindex="-1"></a>  df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(mat)</span>
-<span id="cb25-6"><a href="visualizing-distributions.html#cb25-6" tabindex="-1"></a>  df_long <span class="ot">&lt;-</span> df <span class="sc">|&gt;</span></span>
-<span id="cb25-7"><a href="visualizing-distributions.html#cb25-7" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">gene =</span> <span class="fu">rownames</span>(df)) <span class="sc">|&gt;</span></span>
-<span id="cb25-8"><a href="visualizing-distributions.html#cb25-8" tabindex="-1"></a>    <span class="fu">pivot_longer</span>(<span class="sc">-</span>gene, <span class="at">names_to =</span> <span class="st">&quot;sample&quot;</span>, <span class="at">values_to =</span> <span class="st">&quot;value&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb25-9"><a href="visualizing-distributions.html#cb25-9" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">value =</span> <span class="fu">log2</span>(value <span class="sc">+</span> <span class="dv">1</span>))</span>
-<span id="cb25-10"><a href="visualizing-distributions.html#cb25-10" tabindex="-1"></a></span>
-<span id="cb25-11"><a href="visualizing-distributions.html#cb25-11" tabindex="-1"></a>  <span class="fu">ggplot</span>(df_long, <span class="fu">aes</span>(<span class="at">x =</span> sample, <span class="at">y =</span> value)) <span class="sc">+</span></span>
-<span id="cb25-12"><a href="visualizing-distributions.html#cb25-12" tabindex="-1"></a>    <span class="fu">geom_boxplot</span>(<span class="at">outlier.size =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
-<span id="cb25-13"><a href="visualizing-distributions.html#cb25-13" tabindex="-1"></a>    <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
-<span id="cb25-14"><a href="visualizing-distributions.html#cb25-14" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>, <span class="at">vjust =</span> <span class="fl">0.5</span>, <span class="at">hjust =</span> <span class="dv">1</span>)) <span class="sc">+</span></span>
-<span id="cb25-15"><a href="visualizing-distributions.html#cb25-15" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">title =</span> main, <span class="at">x =</span> <span class="st">&quot;Sample&quot;</span>, <span class="at">y =</span> ylab)</span>
-<span id="cb25-16"><a href="visualizing-distributions.html#cb25-16" tabindex="-1"></a>}</span>
-<span id="cb25-17"><a href="visualizing-distributions.html#cb25-17" tabindex="-1"></a></span>
-<span id="cb25-18"><a href="visualizing-distributions.html#cb25-18" tabindex="-1"></a><span class="fu">plot_box</span>(x[,<span class="dv">2</span><span class="sc">:</span><span class="fu">ncol</span>(x)])</span></code></pre></div>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="visualizing-distributions.html#cb27-1" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb27-2"><a href="visualizing-distributions.html#cb27-2" tabindex="-1"></a></span>
+<span id="cb27-3"><a href="visualizing-distributions.html#cb27-3" tabindex="-1"></a><span class="co"># suppose &#39;mat&#39; is a gene x sample matrix (numeric)</span></span>
+<span id="cb27-4"><a href="visualizing-distributions.html#cb27-4" tabindex="-1"></a>plot_box <span class="ot">&lt;-</span> <span class="cf">function</span>(mat, <span class="at">main =</span> <span class="st">&quot;&quot;</span>, <span class="at">ylab =</span> <span class="st">&quot;log2(counts+1)&quot;</span>) {</span>
+<span id="cb27-5"><a href="visualizing-distributions.html#cb27-5" tabindex="-1"></a>  df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(mat)</span>
+<span id="cb27-6"><a href="visualizing-distributions.html#cb27-6" tabindex="-1"></a>  df_long <span class="ot">&lt;-</span> df <span class="sc">|&gt;</span></span>
+<span id="cb27-7"><a href="visualizing-distributions.html#cb27-7" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">gene =</span> <span class="fu">rownames</span>(df)) <span class="sc">|&gt;</span></span>
+<span id="cb27-8"><a href="visualizing-distributions.html#cb27-8" tabindex="-1"></a>    <span class="fu">pivot_longer</span>(<span class="sc">-</span>gene, <span class="at">names_to =</span> <span class="st">&quot;sample&quot;</span>, <span class="at">values_to =</span> <span class="st">&quot;value&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb27-9"><a href="visualizing-distributions.html#cb27-9" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">value =</span> <span class="fu">log2</span>(value <span class="sc">+</span> <span class="dv">1</span>))</span>
+<span id="cb27-10"><a href="visualizing-distributions.html#cb27-10" tabindex="-1"></a></span>
+<span id="cb27-11"><a href="visualizing-distributions.html#cb27-11" tabindex="-1"></a>  <span class="fu">ggplot</span>(df_long, <span class="fu">aes</span>(<span class="at">x =</span> sample, <span class="at">y =</span> value)) <span class="sc">+</span></span>
+<span id="cb27-12"><a href="visualizing-distributions.html#cb27-12" tabindex="-1"></a>    <span class="fu">geom_boxplot</span>(<span class="at">outlier.size =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb27-13"><a href="visualizing-distributions.html#cb27-13" tabindex="-1"></a>    <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb27-14"><a href="visualizing-distributions.html#cb27-14" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>, <span class="at">vjust =</span> <span class="fl">0.5</span>, <span class="at">hjust =</span> <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb27-15"><a href="visualizing-distributions.html#cb27-15" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">title =</span> main, <span class="at">x =</span> <span class="st">&quot;Sample&quot;</span>, <span class="at">y =</span> ylab)</span>
+<span id="cb27-16"><a href="visualizing-distributions.html#cb27-16" tabindex="-1"></a>}</span>
+<span id="cb27-17"><a href="visualizing-distributions.html#cb27-17" tabindex="-1"></a></span>
+<span id="cb27-18"><a href="visualizing-distributions.html#cb27-18" tabindex="-1"></a><span class="fu">plot_box</span>(x[,<span class="dv">2</span><span class="sc">:</span><span class="fu">ncol</span>(x)])</span></code></pre></div>
 <p><img src="03-visualizing-distributions_files/figure-html/unnamed-chunk-1-1.png" alt="" width="672" /></p>
 </div>
 <div id="density-plots" class="section level2 hasAnchor" number="3.3">
 <h2><span class="header-section-number">3.3</span> Density plots<a href="visualizing-distributions.html#density-plots" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="visualizing-distributions.html#cb26-1" tabindex="-1"></a>plot_density <span class="ot">&lt;-</span> <span class="cf">function</span>(mat, <span class="at">main =</span> <span class="st">&quot;&quot;</span>) {</span>
-<span id="cb26-2"><a href="visualizing-distributions.html#cb26-2" tabindex="-1"></a>  df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(mat)</span>
-<span id="cb26-3"><a href="visualizing-distributions.html#cb26-3" tabindex="-1"></a>  df_long <span class="ot">&lt;-</span> df <span class="sc">|&gt;</span></span>
-<span id="cb26-4"><a href="visualizing-distributions.html#cb26-4" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">gene =</span> <span class="fu">rownames</span>(df)) <span class="sc">|&gt;</span></span>
-<span id="cb26-5"><a href="visualizing-distributions.html#cb26-5" tabindex="-1"></a>    <span class="fu">pivot_longer</span>(<span class="sc">-</span>gene, <span class="at">names_to =</span> <span class="st">&quot;sample&quot;</span>, <span class="at">values_to =</span> <span class="st">&quot;value&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb26-6"><a href="visualizing-distributions.html#cb26-6" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">value =</span> <span class="fu">log2</span>(value <span class="sc">+</span> <span class="dv">1</span>))</span>
-<span id="cb26-7"><a href="visualizing-distributions.html#cb26-7" tabindex="-1"></a></span>
-<span id="cb26-8"><a href="visualizing-distributions.html#cb26-8" tabindex="-1"></a>  <span class="fu">ggplot</span>(df_long, <span class="fu">aes</span>(<span class="at">x =</span> value, <span class="at">colour =</span> sample)) <span class="sc">+</span></span>
-<span id="cb26-9"><a href="visualizing-distributions.html#cb26-9" tabindex="-1"></a>    <span class="fu">geom_density</span>() <span class="sc">+</span></span>
-<span id="cb26-10"><a href="visualizing-distributions.html#cb26-10" tabindex="-1"></a>    <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
-<span id="cb26-11"><a href="visualizing-distributions.html#cb26-11" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">title =</span> main, <span class="at">x =</span> <span class="st">&quot;log2(counts+1)&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Density&quot;</span>) <span class="sc">+</span></span>
-<span id="cb26-12"><a href="visualizing-distributions.html#cb26-12" tabindex="-1"></a>    <span class="fu">guides</span>(<span class="at">colour =</span> <span class="st">&quot;none&quot;</span>)</span>
-<span id="cb26-13"><a href="visualizing-distributions.html#cb26-13" tabindex="-1"></a>}</span>
-<span id="cb26-14"><a href="visualizing-distributions.html#cb26-14" tabindex="-1"></a></span>
-<span id="cb26-15"><a href="visualizing-distributions.html#cb26-15" tabindex="-1"></a><span class="fu">plot_density</span>(x[,<span class="dv">2</span><span class="sc">:</span><span class="fu">ncol</span>(x)])</span></code></pre></div>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="visualizing-distributions.html#cb28-1" tabindex="-1"></a>plot_density <span class="ot">&lt;-</span> <span class="cf">function</span>(mat, <span class="at">main =</span> <span class="st">&quot;&quot;</span>) {</span>
+<span id="cb28-2"><a href="visualizing-distributions.html#cb28-2" tabindex="-1"></a>  df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(mat)</span>
+<span id="cb28-3"><a href="visualizing-distributions.html#cb28-3" tabindex="-1"></a>  df_long <span class="ot">&lt;-</span> df <span class="sc">|&gt;</span></span>
+<span id="cb28-4"><a href="visualizing-distributions.html#cb28-4" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">gene =</span> <span class="fu">rownames</span>(df)) <span class="sc">|&gt;</span></span>
+<span id="cb28-5"><a href="visualizing-distributions.html#cb28-5" tabindex="-1"></a>    <span class="fu">pivot_longer</span>(<span class="sc">-</span>gene, <span class="at">names_to =</span> <span class="st">&quot;sample&quot;</span>, <span class="at">values_to =</span> <span class="st">&quot;value&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb28-6"><a href="visualizing-distributions.html#cb28-6" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">value =</span> <span class="fu">log2</span>(value <span class="sc">+</span> <span class="dv">1</span>))</span>
+<span id="cb28-7"><a href="visualizing-distributions.html#cb28-7" tabindex="-1"></a></span>
+<span id="cb28-8"><a href="visualizing-distributions.html#cb28-8" tabindex="-1"></a>  <span class="fu">ggplot</span>(df_long, <span class="fu">aes</span>(<span class="at">x =</span> value, <span class="at">colour =</span> sample)) <span class="sc">+</span></span>
+<span id="cb28-9"><a href="visualizing-distributions.html#cb28-9" tabindex="-1"></a>    <span class="fu">geom_density</span>() <span class="sc">+</span></span>
+<span id="cb28-10"><a href="visualizing-distributions.html#cb28-10" tabindex="-1"></a>    <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb28-11"><a href="visualizing-distributions.html#cb28-11" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">title =</span> main, <span class="at">x =</span> <span class="st">&quot;log2(counts+1)&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Density&quot;</span>) <span class="sc">+</span></span>
+<span id="cb28-12"><a href="visualizing-distributions.html#cb28-12" tabindex="-1"></a>    <span class="fu">guides</span>(<span class="at">colour =</span> <span class="st">&quot;none&quot;</span>)</span>
+<span id="cb28-13"><a href="visualizing-distributions.html#cb28-13" tabindex="-1"></a>}</span>
+<span id="cb28-14"><a href="visualizing-distributions.html#cb28-14" tabindex="-1"></a></span>
+<span id="cb28-15"><a href="visualizing-distributions.html#cb28-15" tabindex="-1"></a><span class="fu">plot_density</span>(x[,<span class="dv">2</span><span class="sc">:</span><span class="fu">ncol</span>(x)])</span></code></pre></div>
 <p><img src="03-visualizing-distributions_files/figure-html/unnamed-chunk-2-1.png" alt="" width="672" /></p>
 
 </div>

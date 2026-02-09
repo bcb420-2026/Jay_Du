@@ -1,3 +1,8 @@
+tab:unnamed-chunk-2
+tab:unnamed-chunk-4
+tab:unnamed-chunk-5
+tab:unnamed-chunk-6
+tab:unnamed-chunk-8
 what-is-identifier-mapping
 visual-overview
 getting-data-from-geo
@@ -18,5 +23,14 @@ raw-data-preview
 after-mapping-ensembl-hgnc
 exercises
 exercise-1-httpswww.ncbi.nlm.nih.govgeoqueryacc.cgiaccgse119732
+helper-functions
+question-1
+question-2
+question-3
+question-4
 exercise-2-httpswww.ncbi.nlm.nih.govgeoqueryacc.cgiaccgse122380
+question-1-1
+question-2-1
+question-3-1
+question-4-1
 exercise-3--

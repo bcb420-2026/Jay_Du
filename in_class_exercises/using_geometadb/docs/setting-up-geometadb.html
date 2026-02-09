@@ -26,7 +26,7 @@ ask reproducible questions in SQL from R, and shortlist RNA-seq series.</p>" />
 <meta name="author" content="Ruth Isserlin" />
 
 
-<meta name="date" content="2026-01-19" />
+<meta name="date" content="2026-02-09" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -208,30 +208,30 @@ It mirrors GEO as-is (no curation). Download the current SQLite file once and re
 <div id="get-the-sqlite-database" class="section level2 hasAnchor" number="3.2">
 <h2><span class="header-section-number">3.2</span> Get the SQLite database<a href="setting-up-geometadb.html#get-the-sqlite-database" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="setting-up-geometadb.html#cb4-1" tabindex="-1"></a><span class="fu">library</span>(GEOmetadb)</span>
-<span id="cb4-2"><a href="setting-up-geometadb.html#cb4-2" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">file.exists</span>(<span class="st">&#39;GEOmetadb.sqlite&#39;</span>)) <span class="fu">getSQLiteFile</span>()</span>
-<span id="cb4-3"><a href="setting-up-geometadb.html#cb4-3" tabindex="-1"></a><span class="fu">file.info</span>(<span class="st">&#39;GEOmetadb.sqlite&#39;</span>)</span></code></pre></div>
-<pre><code>##                         size isdir mode               mtime               ctime               atime  uid  gid   uname
-## GEOmetadb.sqlite 19576775680 FALSE  644 2026-01-18 01:34:48 2026-01-19 16:25:09 2026-01-19 16:28:41 1000 1000 rstudio
-##                   grname
-## GEOmetadb.sqlite rstudio</code></pre>
+<span id="cb4-2"><a href="setting-up-geometadb.html#cb4-2" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">file.exists</span>(<span class="st">&#39;GEOmetadb.sqlite&#39;</span>)) <span class="fu">getSQLiteFile</span>()</span></code></pre></div>
+<pre><code>## Unzipping...
+## Metadata associate with downloaded file:
+##                 name               value
+## 1     schema version                 1.0
+## 2 creation timestamp 2024-03-06 03:05:59</code></pre>
+<pre><code>## [1] &quot;/home/rstudio/BCB420/Jay_Du/in_class_exercises/using_geometadb/GEOmetadb.sqlite&quot;</code></pre>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="setting-up-geometadb.html#cb7-1" tabindex="-1"></a><span class="fu">file.info</span>(<span class="st">&#39;GEOmetadb.sqlite&#39;</span>)</span></code></pre></div>
+<pre><code>##                         size isdir mode               mtime               ctime               atime  uid  gid   uname  grname
+## GEOmetadb.sqlite 19576775680 FALSE  644 2026-02-09 22:17:44 2026-02-09 22:17:44 2026-02-09 22:17:44 1000 1000 rstudio rstudio</code></pre>
 </div>
 <div id="connect-to-the-database" class="section level2 hasAnchor" number="3.3">
 <h2><span class="header-section-number">3.3</span> Connect to the database<a href="setting-up-geometadb.html#connect-to-the-database" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="setting-up-geometadb.html#cb6-1" tabindex="-1"></a><span class="fu">library</span>(DBI)</span>
-<span id="cb6-2"><a href="setting-up-geometadb.html#cb6-2" tabindex="-1"></a><span class="fu">library</span>(RSQLite)</span>
-<span id="cb6-3"><a href="setting-up-geometadb.html#cb6-3" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(<span class="fu">SQLite</span>(), <span class="st">&#39;GEOmetadb.sqlite&#39;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="setting-up-geometadb.html#cb9-1" tabindex="-1"></a><span class="fu">library</span>(DBI)</span>
+<span id="cb9-2"><a href="setting-up-geometadb.html#cb9-2" tabindex="-1"></a><span class="fu">library</span>(RSQLite)</span>
+<span id="cb9-3"><a href="setting-up-geometadb.html#cb9-3" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(<span class="fu">SQLite</span>(), <span class="st">&#39;GEOmetadb.sqlite&#39;</span>)</span></code></pre></div>
 </div>
 <div id="explore-tables-and-fields" class="section level2 hasAnchor" number="3.4">
 <h2><span class="header-section-number">3.4</span> Explore tables and fields<a href="setting-up-geometadb.html#explore-tables-and-fields" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="setting-up-geometadb.html#cb7-1" tabindex="-1"></a><span class="fu">dbListTables</span>(con)</span></code></pre></div>
-<pre><code>##  [1] &quot;gds&quot;               &quot;gds_subset&quot;        &quot;geoConvert&quot;        &quot;geodb_column_desc&quot; &quot;gpl&quot;              
-##  [6] &quot;gse&quot;               &quot;gse_gpl&quot;           &quot;gse_gsm&quot;           &quot;gsm&quot;               &quot;metaInfo&quot;         
-## [11] &quot;sMatrix&quot;</code></pre>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="setting-up-geometadb.html#cb9-1" tabindex="-1"></a><span class="fu">dbListFields</span>(con, <span class="st">&#39;gse&#39;</span>)</span></code></pre></div>
-<pre><code>##  [1] &quot;ID&quot;                   &quot;title&quot;                &quot;gse&quot;                  &quot;status&quot;               &quot;submission_date&quot;     
-##  [6] &quot;last_update_date&quot;     &quot;pubmed_id&quot;            &quot;summary&quot;              &quot;type&quot;                 &quot;contributor&quot;         
-## [11] &quot;web_link&quot;             &quot;overall_design&quot;       &quot;repeats&quot;              &quot;repeats_sample_list&quot;  &quot;variable&quot;            
-## [16] &quot;variable_description&quot; &quot;contact&quot;              &quot;supplementary_file&quot;</code></pre>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="setting-up-geometadb.html#cb10-1" tabindex="-1"></a><span class="fu">dbListTables</span>(con)</span></code></pre></div>
+<pre><code>##  [1] &quot;gds&quot;               &quot;gds_subset&quot;        &quot;geoConvert&quot;        &quot;geodb_column_desc&quot; &quot;gpl&quot;               &quot;gse&quot;               &quot;gse_gpl&quot;           &quot;gse_gsm&quot;           &quot;gsm&quot;               &quot;metaInfo&quot;          &quot;sMatrix&quot;</code></pre>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="setting-up-geometadb.html#cb12-1" tabindex="-1"></a><span class="fu">dbListFields</span>(con, <span class="st">&#39;gse&#39;</span>)</span></code></pre></div>
+<pre><code>##  [1] &quot;ID&quot;                   &quot;title&quot;                &quot;gse&quot;                  &quot;status&quot;               &quot;submission_date&quot;      &quot;last_update_date&quot;     &quot;pubmed_id&quot;            &quot;summary&quot;              &quot;type&quot;                 &quot;contributor&quot;         
+## [11] &quot;web_link&quot;             &quot;overall_design&quot;       &quot;repeats&quot;              &quot;repeats_sample_list&quot;  &quot;variable&quot;             &quot;variable_description&quot; &quot;contact&quot;              &quot;supplementary_file&quot;</code></pre>
 
 </div>
 </div>

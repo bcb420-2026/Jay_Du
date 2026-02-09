@@ -26,7 +26,7 @@ ask reproducible questions in SQL from R, and shortlist RNA-seq series.</p>" />
 <meta name="author" content="Ruth Isserlin" />
 
 
-<meta name="date" content="2026-01-19" />
+<meta name="date" content="2026-02-09" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -201,6 +201,45 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <blockquote>
 <p>Hint: Sample labels are not standardized. Use robust keyword detection (e.g., <code>control|normal|healthy|wild[- ]?type</code> vs. <code>tumou?r|cancer|patient|disease|mutant|treated</code>). Inspect a few GSM rows if the automatic inference is uncertain.</p>
 </blockquote>
+<p><strong>Summary of Findings per GSE:</strong></p>
+<ul>
+<li><strong>GSE201427</strong>
+<ul>
+<li>Type: High-throughput sequencing (RNA-seq)<br />
+</li>
+<li>Organism/Disease: Human pancreatic ductal adenocarcinoma (PDAC) cell line (Panc1) under hypoxia. SF3B1 splicing factor knockdown was used to study its role in HIF1α-mediated gene expression and glycolysis.</li>
+<li>Samples: 8 total (control vs SF3B1 knockdown)</li>
+<li>Control vs Disease: 5 controls, 3 disease</li>
+</ul></li>
+<li><strong>GSE166530</strong>
+<ul>
+<li>Type: High-throughput sequencing (RNA-seq)<br />
+</li>
+<li>Organism/Disease: Human COVID‑19 infection vs. control, focusing on transcriptional changes related to immune response and viral pathogenesis.</li>
+<li>Samples: 41 total (5 healthy, 36 COVID-19 infected)</li>
+<li>Control vs Disease: 5 controls, 36 disease</li>
+</ul></li>
+<li><strong>GSE162183</strong>
+<ul>
+<li>Type: Single‑cell expression profiling by high‑throughput sequencing (scRNA‑seq)</li>
+<li>Organism/Disease: Human psoriasis. Lesional skin from psoriasis patients compared to healthy donor skin to identify immune and inflammatory cell populations.<br />
+</li>
+<li>Samples: 6 (3 patients, 3 healthy donors) (scRNA‑seq)</li>
+<li>Control vs Disease: 3 controls, 3 disease</li>
+</ul></li>
+<li><strong>GSE186458</strong>
+<ul>
+<li>Type: Whole-genome bisulfite sequencing (DNA methylation)<br />
+</li>
+<li>Organism/Disease: Healthy human tissues. Atlas of DNA methylation across 39 cell types to map epigenetic regulation; no disease model.<br />
+</li>
+<li>Samples: 253 total</li>
+<li>Control vs Disease: all 205 samples healthy</li>
+</ul>
+<strong>GSE264108</strong><br />
+No, not via GEOmetadb, because it is not present in the SQLite snapshot.
+However, it is available on <a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE264108">GEO</a></li>
+</ul>
 
 </div>
             </section>

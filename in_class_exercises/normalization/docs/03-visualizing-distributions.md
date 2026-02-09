@@ -144,7 +144,14 @@ gse <- "GSE119732"
 
 source("./supp_functions.R")
 fetch_geo_supp(gse = gse)
+```
 
+```
+## Using locally cached version of supplementary file(s) GSE119732 found here:
+## data/GSE119732/GSE119732_count_table_RNA_seq.txt.gz
+```
+
+``` r
 path <- file.path("data", gse)
 files <- list.files(path, pattern = "\\.txt.gz$|\\.tsv.gz$|\\.csv.gz$", 
                     full.names = TRUE, recursive = TRUE)

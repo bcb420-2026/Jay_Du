@@ -28,7 +28,7 @@ In this exercise, you'll retrieve metadata for the following GEO Series and answ
 - **GSE166530**  
   - Type: High-throughput sequencing (RNA-seq)   
   - Organism/Disease: Human COVID‑19 infection vs. control, focusing on transcriptional changes related to immune response and viral pathogenesis.
-  - Samples: 41 total 
+  - Samples: 41 total (5 healthy, 36 COVID-19 infected)
   - Control vs Disease: 5 controls, 36 disease
 
 - **GSE162183**  

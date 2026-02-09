@@ -12,6 +12,14 @@ Using **GSE119732**,
 ### Helper functions
 
 ```{r}
+# Load library
+library(readr)
+library(stringr)
+library(dplyr)
+library(tidyr)
+library(edgeR)
+library(ggplot2)
+
 # Safe read files
 safe_read <- function(file) {
   # First attempt: read as TSV
@@ -74,7 +82,7 @@ source("./supp_functions.R")
 ```
 
 
-### 1.
+### Question 1
 
 #### Raw Box Plot
 ```{r}
@@ -95,7 +103,7 @@ plot_density(x[,2:ncol(x)], main = "GSE119732 Raw Density")
 ```
 
 
-### 2.
+### Question 2
 
 #### Boxplot by patient
 ```{r}
@@ -123,17 +131,13 @@ plot_density_by_var(raw_mat, sample_data, "patient", main = "GSE119732 Raw: Dens
 plot_box_by_var(raw_mat, sample_data, "celltype", "GSE119732 Raw: Boxplot by Cell Type")
 ```
 
-
+#### Density by cell type
 ```{r}
-raw_mat <- as.matrix(x[,2:ncol(x)])
-rownames(raw_mat) <- x[[1]]
-
-# Generate the plots
 plot_density_by_var(raw_mat, sample_data, "celltype", "GSE119732 Raw: Density by Cell Type")
 ```
 
 
-### 3. 
+### Question 2 
 
 #### Boxplot with expression <3 removed
 ```{r}
@@ -149,7 +153,7 @@ plot_box(x_cpm_filtered, main = "GSE119732 Boxplot: Filtered out lowly expressed
 
 #### Density with expression <3 removed
 ```{r}
-plot_density(x_filtered, main = "GSE119732 Density: Filtered out lowly expressed")
+plot_density(x_cpm_filtered, main = "GSE119732 Density: Filtered out lowly expressed")
 ```
 
 
@@ -163,7 +167,7 @@ Using **GSE122380**, confirm whether the ID column contains Ensembl IDs with ver
   3.  Filter out lowly expressed genes and re plot the distributions.
 
 
-### 1.
+### Question 1
 
 #### Check for version suffixes
 ```{r}
@@ -174,13 +178,6 @@ files <- list.files(path, pattern = "\\.txt.gz$|\\.tsv.gz$|\\.csv.gz$",
                     full.names = TRUE, recursive = TRUE)
 
 x<- safe_read(files[1])
-
-# Extract the first 20 IDs
-first_20_ids <- head(x$gene_id, 20)
-
-# Count how many of the first 20 contain a "."
-dot_count <- sum(grepl("\\.", first_20_ids))
-print(paste("Number of IDs with version suffixes in first 20:", dot_count))
 
 # Count how many total contain a "."
 dot_count <- sum(grepl("\\.", x$gene_id))
@@ -201,7 +198,7 @@ plot_density(x[,2:ncol(x)], main = "GSE122380 Raw Density")
 ```
 
 
-### 2.
+### Question 2
 
 #### Boxplot by patient
 ```{r}
@@ -228,22 +225,18 @@ plot_density_by_var(raw_mat, sample_data, "patient", main = "GSE122380 Raw: Dens
 ```
 
 
-#### Boxplot by cell type
+#### Boxplot by Timepoint
 ```{r}
 plot_box_by_var(raw_mat, sample_data, "timepoint", "GSE122380 Raw: Boxplot by Timepoint")
 ```
 
-
+#### Density by Timepoint
 ```{r}
-raw_mat <- as.matrix(x[,2:ncol(x)])
-rownames(raw_mat) <- x[[1]]
-
-# Generate the plots
 plot_density_by_var(raw_mat, sample_data, "timepoint", "GSE122380 Raw: Density by Timepoint")
 ```
 
 
-### 3. 
+### Question 2 
 
 #### Boxplot with expression <3 removed
 ```{r}

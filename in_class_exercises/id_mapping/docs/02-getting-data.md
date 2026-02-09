@@ -73,6 +73,34 @@ library(GEOquery)
 source("./fetch_geo_supp.R")
 
 fetch_geo_supp(gse = "GSE233947")
+```
+
+```
+## Using locally cached version of supplementary file(s) GSE233947 found here:
+## data/GSE233947/GSE233947_FeatureCounts_V31genes_RawCounts_ENSG.tsv.gz
+```
+
+```
+## Using locally cached version of supplementary file(s) GSE233947 found here:
+## data/GSE233947/GSE233947_modulize_3CTG_20CTG_junctions.tsv.gz
+```
+
+```
+## Using locally cached version of supplementary file(s) GSE233947 found here:
+## data/GSE233947/GSE233947_modulize_NT_20CTG_junctions.tsv.gz
+```
+
+```
+## Using locally cached version of supplementary file(s) GSE233947 found here:
+## data/GSE233947/GSE233947_modulize_NT_3CTG_junctions.tsv.gz
+```
+
+``` r
 fetch_geo_supp(gse = "GSE119732")
+```
+
+```
+## Using locally cached version of supplementary file(s) GSE119732 found here:
+## data/GSE119732/GSE119732_count_table_RNA_seq.txt.gz
 ```
 

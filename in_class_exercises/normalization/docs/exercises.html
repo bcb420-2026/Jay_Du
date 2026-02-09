@@ -185,8 +185,19 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 <li class="chapter" data-level="6" data-path="exercises.html"><a href="exercises.html"><i class="fa fa-check"></i><b>6</b> Exercises</a>
 <ul>
-<li class="chapter" data-level="6.1" data-path="exercises.html"><a href="exercises.html#exercise-1-httpswww.ncbi.nlm.nih.govgeoqueryacc.cgiaccgse119732"><i class="fa fa-check"></i><b>6.1</b> Exercise 1 — https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE119732</a></li>
-<li class="chapter" data-level="6.2" data-path="exercises.html"><a href="exercises.html#exercise-2-httpswww.ncbi.nlm.nih.govgeoqueryacc.cgiaccgse122380"><i class="fa fa-check"></i><b>6.2</b> Exercise 2 — https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE122380</a></li>
+<li class="chapter" data-level="6.1" data-path="exercises.html"><a href="exercises.html#exercise-1-httpswww.ncbi.nlm.nih.govgeoqueryacc.cgiaccgse119732"><i class="fa fa-check"></i><b>6.1</b> Exercise 1 — https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE119732</a>
+<ul>
+<li class="chapter" data-level="6.1.1" data-path="exercises.html"><a href="exercises.html#helper-functions"><i class="fa fa-check"></i><b>6.1.1</b> Helper functions</a></li>
+<li class="chapter" data-level="6.1.2" data-path="exercises.html"><a href="exercises.html#question-1"><i class="fa fa-check"></i><b>6.1.2</b> Question 1</a></li>
+<li class="chapter" data-level="6.1.3" data-path="exercises.html"><a href="exercises.html#question-2"><i class="fa fa-check"></i><b>6.1.3</b> Question 2</a></li>
+<li class="chapter" data-level="6.1.4" data-path="exercises.html"><a href="exercises.html#question-2-1"><i class="fa fa-check"></i><b>6.1.4</b> Question 2</a></li>
+</ul></li>
+<li class="chapter" data-level="6.2" data-path="exercises.html"><a href="exercises.html#exercise-2-httpswww.ncbi.nlm.nih.govgeoqueryacc.cgiaccgse122380"><i class="fa fa-check"></i><b>6.2</b> Exercise 2 — https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE122380</a>
+<ul>
+<li class="chapter" data-level="6.2.1" data-path="exercises.html"><a href="exercises.html#question-1-1"><i class="fa fa-check"></i><b>6.2.1</b> Question 1</a></li>
+<li class="chapter" data-level="6.2.2" data-path="exercises.html"><a href="exercises.html#question-2-2"><i class="fa fa-check"></i><b>6.2.2</b> Question 2</a></li>
+<li class="chapter" data-level="6.2.3" data-path="exercises.html"><a href="exercises.html#question-2-3"><i class="fa fa-check"></i><b>6.2.3</b> Question 2</a></li>
+</ul></li>
 <li class="chapter" data-level="6.3" data-path="exercises.html"><a href="exercises.html#exercise-3--"><i class="fa fa-check"></i><b>6.3</b> Exercise 3 -</a></li>
 </ul></li>
 </ul>
@@ -217,6 +228,158 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li>Add colours to the plot separating the different variables in the model</li>
 <li>Filter out lowly expressed genes and re plot the distributions.</li>
 </ol>
+<div id="helper-functions" class="section level3 hasAnchor" number="6.1.1">
+<h3><span class="header-section-number">6.1.1</span> Helper functions<a href="exercises.html#helper-functions" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb55-1"><a href="exercises.html#cb55-1" tabindex="-1"></a><span class="co"># Load library</span></span>
+<span id="cb55-2"><a href="exercises.html#cb55-2" tabindex="-1"></a><span class="fu">library</span>(readr)</span>
+<span id="cb55-3"><a href="exercises.html#cb55-3" tabindex="-1"></a><span class="fu">library</span>(stringr)</span>
+<span id="cb55-4"><a href="exercises.html#cb55-4" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code></pre></div>
+<pre><code>## 
+## Attaching package: &#39;dplyr&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:stats&#39;:
+## 
+##     filter, lag</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     intersect, setdiff, setequal, union</code></pre>
+<div class="sourceCode" id="cb59"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb59-1"><a href="exercises.html#cb59-1" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
+<span id="cb59-2"><a href="exercises.html#cb59-2" tabindex="-1"></a><span class="fu">library</span>(edgeR)</span></code></pre></div>
+<pre><code>## Loading required package: limma</code></pre>
+<div class="sourceCode" id="cb61"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb61-1"><a href="exercises.html#cb61-1" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb61-2"><a href="exercises.html#cb61-2" tabindex="-1"></a></span>
+<span id="cb61-3"><a href="exercises.html#cb61-3" tabindex="-1"></a><span class="co"># Safe read files</span></span>
+<span id="cb61-4"><a href="exercises.html#cb61-4" tabindex="-1"></a>safe_read <span class="ot">&lt;-</span> <span class="cf">function</span>(file) {</span>
+<span id="cb61-5"><a href="exercises.html#cb61-5" tabindex="-1"></a>  <span class="co"># First attempt: read as TSV</span></span>
+<span id="cb61-6"><a href="exercises.html#cb61-6" tabindex="-1"></a>  df <span class="ot">&lt;-</span> <span class="fu">tryCatch</span>(</span>
+<span id="cb61-7"><a href="exercises.html#cb61-7" tabindex="-1"></a>    readr<span class="sc">::</span><span class="fu">read_tsv</span>(file, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>),</span>
+<span id="cb61-8"><a href="exercises.html#cb61-8" tabindex="-1"></a>    <span class="at">error =</span> <span class="cf">function</span>(e) <span class="cn">NULL</span>   <span class="co"># catch fatal errors</span></span>
+<span id="cb61-9"><a href="exercises.html#cb61-9" tabindex="-1"></a>  )</span>
+<span id="cb61-10"><a href="exercises.html#cb61-10" tabindex="-1"></a>  </span>
+<span id="cb61-11"><a href="exercises.html#cb61-11" tabindex="-1"></a>  <span class="co"># If read_tsv failed entirely:</span></span>
+<span id="cb61-12"><a href="exercises.html#cb61-12" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.null</span>(df)) {</span>
+<span id="cb61-13"><a href="exercises.html#cb61-13" tabindex="-1"></a>    <span class="fu">message</span>(<span class="st">&quot;TSV read failed — reading as space-delimited file instead.&quot;</span>)</span>
+<span id="cb61-14"><a href="exercises.html#cb61-14" tabindex="-1"></a>    <span class="fu">return</span>(readr<span class="sc">::</span><span class="fu">read_table</span>(file, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>))</span>
+<span id="cb61-15"><a href="exercises.html#cb61-15" tabindex="-1"></a>  }</span>
+<span id="cb61-16"><a href="exercises.html#cb61-16" tabindex="-1"></a>  </span>
+<span id="cb61-17"><a href="exercises.html#cb61-17" tabindex="-1"></a>  <span class="co"># If read_tsv returned but with parsing issues:</span></span>
+<span id="cb61-18"><a href="exercises.html#cb61-18" tabindex="-1"></a>  probs <span class="ot">&lt;-</span> <span class="fu">problems</span>(df)</span>
+<span id="cb61-19"><a href="exercises.html#cb61-19" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">nrow</span>(probs) <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb61-20"><a href="exercises.html#cb61-20" tabindex="-1"></a>    <span class="fu">message</span>(<span class="st">&quot;Parsing issues detected in TSV — reading as space-delimited file instead.&quot;</span>)</span>
+<span id="cb61-21"><a href="exercises.html#cb61-21" tabindex="-1"></a>    <span class="fu">return</span>(readr<span class="sc">::</span><span class="fu">read_table</span>(file, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>))</span>
+<span id="cb61-22"><a href="exercises.html#cb61-22" tabindex="-1"></a>  }</span>
+<span id="cb61-23"><a href="exercises.html#cb61-23" tabindex="-1"></a>  </span>
+<span id="cb61-24"><a href="exercises.html#cb61-24" tabindex="-1"></a>  <span class="co"># If everything was fine:</span></span>
+<span id="cb61-25"><a href="exercises.html#cb61-25" tabindex="-1"></a>  <span class="fu">return</span>(df)</span>
+<span id="cb61-26"><a href="exercises.html#cb61-26" tabindex="-1"></a>}</span>
+<span id="cb61-27"><a href="exercises.html#cb61-27" tabindex="-1"></a></span>
+<span id="cb61-28"><a href="exercises.html#cb61-28" tabindex="-1"></a></span>
+<span id="cb61-29"><a href="exercises.html#cb61-29" tabindex="-1"></a><span class="co"># Box Plot to support coloring by variable</span></span>
+<span id="cb61-30"><a href="exercises.html#cb61-30" tabindex="-1"></a>plot_box_by_var <span class="ot">&lt;-</span> <span class="cf">function</span>(mat, meta, fill_var, <span class="at">main =</span> <span class="st">&quot;&quot;</span>) {</span>
+<span id="cb61-31"><a href="exercises.html#cb61-31" tabindex="-1"></a>  df_long <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(mat) <span class="sc">%&gt;%</span></span>
+<span id="cb61-32"><a href="exercises.html#cb61-32" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">gene =</span> <span class="fu">rownames</span>(mat)) <span class="sc">%&gt;%</span></span>
+<span id="cb61-33"><a href="exercises.html#cb61-33" tabindex="-1"></a>    <span class="fu">pivot_longer</span>(<span class="sc">-</span>gene, <span class="at">names_to =</span> <span class="st">&quot;samples&quot;</span>, <span class="at">values_to =</span> <span class="st">&quot;value&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb61-34"><a href="exercises.html#cb61-34" tabindex="-1"></a>    <span class="fu">left_join</span>(meta, <span class="at">by =</span> <span class="st">&quot;samples&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb61-35"><a href="exercises.html#cb61-35" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">value =</span> <span class="fu">log2</span>(value <span class="sc">+</span> <span class="dv">1</span>))</span>
+<span id="cb61-36"><a href="exercises.html#cb61-36" tabindex="-1"></a>  </span>
+<span id="cb61-37"><a href="exercises.html#cb61-37" tabindex="-1"></a>  <span class="fu">ggplot</span>(df_long, <span class="fu">aes</span>(<span class="at">x =</span> samples, <span class="at">y =</span> value, <span class="at">fill =</span> .data[[fill_var]])) <span class="sc">+</span></span>
+<span id="cb61-38"><a href="exercises.html#cb61-38" tabindex="-1"></a>    <span class="fu">geom_boxplot</span>(<span class="at">outlier.size =</span> <span class="fl">0.1</span>) <span class="sc">+</span></span>
+<span id="cb61-39"><a href="exercises.html#cb61-39" tabindex="-1"></a>    <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb61-40"><a href="exercises.html#cb61-40" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>, <span class="at">vjust =</span> <span class="fl">0.5</span>)) <span class="sc">+</span></span>
+<span id="cb61-41"><a href="exercises.html#cb61-41" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">title =</span> main, <span class="at">y =</span> <span class="st">&quot;log2(counts+1)&quot;</span>)</span>
+<span id="cb61-42"><a href="exercises.html#cb61-42" tabindex="-1"></a>}</span>
+<span id="cb61-43"><a href="exercises.html#cb61-43" tabindex="-1"></a></span>
+<span id="cb61-44"><a href="exercises.html#cb61-44" tabindex="-1"></a></span>
+<span id="cb61-45"><a href="exercises.html#cb61-45" tabindex="-1"></a><span class="co"># Density Plot to support coloring by variable</span></span>
+<span id="cb61-46"><a href="exercises.html#cb61-46" tabindex="-1"></a>plot_density_by_var <span class="ot">&lt;-</span> <span class="cf">function</span>(mat, meta, color_var, <span class="at">main =</span> <span class="st">&quot;&quot;</span>) {</span>
+<span id="cb61-47"><a href="exercises.html#cb61-47" tabindex="-1"></a>  df_long <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(mat) <span class="sc">%&gt;%</span></span>
+<span id="cb61-48"><a href="exercises.html#cb61-48" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">gene =</span> <span class="fu">rownames</span>(mat)) <span class="sc">%&gt;%</span></span>
+<span id="cb61-49"><a href="exercises.html#cb61-49" tabindex="-1"></a>    <span class="fu">pivot_longer</span>(<span class="sc">-</span>gene, <span class="at">names_to =</span> <span class="st">&quot;samples&quot;</span>, <span class="at">values_to =</span> <span class="st">&quot;value&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb61-50"><a href="exercises.html#cb61-50" tabindex="-1"></a>    <span class="fu">left_join</span>(meta, <span class="at">by =</span> <span class="st">&quot;samples&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb61-51"><a href="exercises.html#cb61-51" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">value =</span> <span class="fu">log2</span>(value <span class="sc">+</span> <span class="dv">1</span>))</span>
+<span id="cb61-52"><a href="exercises.html#cb61-52" tabindex="-1"></a>  </span>
+<span id="cb61-53"><a href="exercises.html#cb61-53" tabindex="-1"></a>  <span class="fu">ggplot</span>(df_long, <span class="fu">aes</span>(<span class="at">x =</span> value, <span class="at">color =</span> .data[[color_var]], <span class="at">group =</span> samples)) <span class="sc">+</span></span>
+<span id="cb61-54"><a href="exercises.html#cb61-54" tabindex="-1"></a>    <span class="fu">geom_density</span>() <span class="sc">+</span></span>
+<span id="cb61-55"><a href="exercises.html#cb61-55" tabindex="-1"></a>    <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb61-56"><a href="exercises.html#cb61-56" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">title =</span> main, <span class="at">x =</span> <span class="st">&quot;log2(counts+1)&quot;</span>)</span>
+<span id="cb61-57"><a href="exercises.html#cb61-57" tabindex="-1"></a>}</span>
+<span id="cb61-58"><a href="exercises.html#cb61-58" tabindex="-1"></a></span>
+<span id="cb61-59"><a href="exercises.html#cb61-59" tabindex="-1"></a></span>
+<span id="cb61-60"><a href="exercises.html#cb61-60" tabindex="-1"></a><span class="co"># Load existing helper function</span></span>
+<span id="cb61-61"><a href="exercises.html#cb61-61" tabindex="-1"></a><span class="fu">source</span>(<span class="st">&quot;./supp_functions.R&quot;</span>)</span></code></pre></div>
+</div>
+<div id="question-1" class="section level3 hasAnchor" number="6.1.2">
+<h3><span class="header-section-number">6.1.2</span> Question 1<a href="exercises.html#question-1" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div id="raw-box-plot" class="section level4 hasAnchor" number="6.1.2.1">
+<h4><span class="header-section-number">6.1.2.1</span> Raw Box Plot<a href="exercises.html#raw-box-plot" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<div class="sourceCode" id="cb62"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb62-1"><a href="exercises.html#cb62-1" tabindex="-1"></a>gse <span class="ot">&lt;-</span> <span class="st">&quot;GSE119732&quot;</span></span>
+<span id="cb62-2"><a href="exercises.html#cb62-2" tabindex="-1"></a>path <span class="ot">&lt;-</span> <span class="fu">file.path</span>(<span class="st">&quot;data&quot;</span>, <span class="st">&quot;GSE119732&quot;</span>)</span>
+<span id="cb62-3"><a href="exercises.html#cb62-3" tabindex="-1"></a>files <span class="ot">&lt;-</span> <span class="fu">list.files</span>(path, <span class="at">pattern =</span> <span class="st">&quot;</span><span class="sc">\\</span><span class="st">.txt.gz$|</span><span class="sc">\\</span><span class="st">.tsv.gz$|</span><span class="sc">\\</span><span class="st">.csv.gz$&quot;</span>, </span>
+<span id="cb62-4"><a href="exercises.html#cb62-4" tabindex="-1"></a>                    <span class="at">full.names =</span> <span class="cn">TRUE</span>, <span class="at">recursive =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb62-5"><a href="exercises.html#cb62-5" tabindex="-1"></a></span>
+<span id="cb62-6"><a href="exercises.html#cb62-6" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">safe_read</span>(files[<span class="dv">1</span>])</span>
+<span id="cb62-7"><a href="exercises.html#cb62-7" tabindex="-1"></a></span>
+<span id="cb62-8"><a href="exercises.html#cb62-8" tabindex="-1"></a><span class="fu">plot_box</span>(x[,<span class="dv">2</span><span class="sc">:</span><span class="fu">ncol</span>(x)], <span class="at">main =</span> <span class="st">&quot;GSE119732 Raw Boxplot&quot;</span>)</span></code></pre></div>
+<p><img src="06-exercises_files/figure-html/unnamed-chunk-2-1.png" alt="" width="672" /></p>
+</div>
+<div id="raw-density-plot" class="section level4 hasAnchor" number="6.1.2.2">
+<h4><span class="header-section-number">6.1.2.2</span> Raw Density Plot<a href="exercises.html#raw-density-plot" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<div class="sourceCode" id="cb63"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb63-1"><a href="exercises.html#cb63-1" tabindex="-1"></a><span class="fu">plot_density</span>(x[,<span class="dv">2</span><span class="sc">:</span><span class="fu">ncol</span>(x)], <span class="at">main =</span> <span class="st">&quot;GSE119732 Raw Density&quot;</span>)</span></code></pre></div>
+<p><img src="06-exercises_files/figure-html/unnamed-chunk-3-1.png" alt="" width="672" /></p>
+</div>
+</div>
+<div id="question-2" class="section level3 hasAnchor" number="6.1.3">
+<h3><span class="header-section-number">6.1.3</span> Question 2<a href="exercises.html#question-2" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div id="boxplot-by-patient" class="section level4 hasAnchor" number="6.1.3.1">
+<h4><span class="header-section-number">6.1.3.1</span> Boxplot by patient<a href="exercises.html#boxplot-by-patient" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<div class="sourceCode" id="cb64"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb64-1"><a href="exercises.html#cb64-1" tabindex="-1"></a>samples <span class="ot">&lt;-</span> <span class="fu">colnames</span>(x)[<span class="dv">2</span><span class="sc">:</span><span class="fu">ncol</span>(x)]</span>
+<span id="cb64-2"><a href="exercises.html#cb64-2" tabindex="-1"></a>patient  <span class="ot">&lt;-</span> <span class="fu">substr</span>(samples, <span class="dv">1</span>, <span class="dv">1</span>)       </span>
+<span id="cb64-3"><a href="exercises.html#cb64-3" tabindex="-1"></a>celltype <span class="ot">&lt;-</span> <span class="fu">substr</span>(samples, <span class="dv">2</span>, <span class="fu">nchar</span>(samples))   </span>
+<span id="cb64-4"><a href="exercises.html#cb64-4" tabindex="-1"></a>sample_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(samples, patient, celltype)</span>
+<span id="cb64-5"><a href="exercises.html#cb64-5" tabindex="-1"></a></span>
+<span id="cb64-6"><a href="exercises.html#cb64-6" tabindex="-1"></a>raw_mat <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(x[,<span class="dv">2</span><span class="sc">:</span><span class="fu">ncol</span>(x)])</span>
+<span id="cb64-7"><a href="exercises.html#cb64-7" tabindex="-1"></a><span class="fu">rownames</span>(raw_mat) <span class="ot">&lt;-</span> x[[<span class="dv">1</span>]]</span>
+<span id="cb64-8"><a href="exercises.html#cb64-8" tabindex="-1"></a></span>
+<span id="cb64-9"><a href="exercises.html#cb64-9" tabindex="-1"></a><span class="co"># Generate the plots</span></span>
+<span id="cb64-10"><a href="exercises.html#cb64-10" tabindex="-1"></a><span class="fu">plot_box_by_var</span>(raw_mat, sample_data, <span class="st">&quot;patient&quot;</span>, <span class="at">main =</span> <span class="st">&quot;GSE119732 Raw: Boxplot by Patient&quot;</span>)</span></code></pre></div>
+<p><img src="06-exercises_files/figure-html/unnamed-chunk-4-1.png" alt="" width="672" /></p>
+</div>
+<div id="density-by-patient" class="section level4 hasAnchor" number="6.1.3.2">
+<h4><span class="header-section-number">6.1.3.2</span> Density by patient<a href="exercises.html#density-by-patient" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<div class="sourceCode" id="cb65"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb65-1"><a href="exercises.html#cb65-1" tabindex="-1"></a><span class="fu">plot_density_by_var</span>(raw_mat, sample_data, <span class="st">&quot;patient&quot;</span>, <span class="at">main =</span> <span class="st">&quot;GSE119732 Raw: Density by Patient&quot;</span>)</span></code></pre></div>
+<p><img src="06-exercises_files/figure-html/unnamed-chunk-5-1.png" alt="" width="672" /></p>
+</div>
+<div id="boxplot-by-cell-type" class="section level4 hasAnchor" number="6.1.3.3">
+<h4><span class="header-section-number">6.1.3.3</span> Boxplot by cell type<a href="exercises.html#boxplot-by-cell-type" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<div class="sourceCode" id="cb66"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb66-1"><a href="exercises.html#cb66-1" tabindex="-1"></a><span class="fu">plot_box_by_var</span>(raw_mat, sample_data, <span class="st">&quot;celltype&quot;</span>, <span class="st">&quot;GSE119732 Raw: Boxplot by Cell Type&quot;</span>)</span></code></pre></div>
+<p><img src="06-exercises_files/figure-html/unnamed-chunk-6-1.png" alt="" width="672" /></p>
+</div>
+<div id="density-by-cell-type" class="section level4 hasAnchor" number="6.1.3.4">
+<h4><span class="header-section-number">6.1.3.4</span> Density by cell type<a href="exercises.html#density-by-cell-type" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<div class="sourceCode" id="cb67"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb67-1"><a href="exercises.html#cb67-1" tabindex="-1"></a><span class="fu">plot_density_by_var</span>(raw_mat, sample_data, <span class="st">&quot;celltype&quot;</span>, <span class="st">&quot;GSE119732 Raw: Density by Cell Type&quot;</span>)</span></code></pre></div>
+<p><img src="06-exercises_files/figure-html/unnamed-chunk-7-1.png" alt="" width="672" /></p>
+</div>
+</div>
+<div id="question-2-1" class="section level3 hasAnchor" number="6.1.4">
+<h3><span class="header-section-number">6.1.4</span> Question 2<a href="exercises.html#question-2-1" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div id="boxplot-with-expression-3-removed" class="section level4 hasAnchor" number="6.1.4.1">
+<h4><span class="header-section-number">6.1.4.1</span> Boxplot with expression &lt;3 removed<a href="exercises.html#boxplot-with-expression-3-removed" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<div class="sourceCode" id="cb68"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb68-1"><a href="exercises.html#cb68-1" tabindex="-1"></a><span class="co"># Convert the raw counts to Counts per million</span></span>
+<span id="cb68-2"><a href="exercises.html#cb68-2" tabindex="-1"></a>x_cpm <span class="ot">&lt;-</span> <span class="fu">cpm</span>(<span class="at">y =</span> x[,<span class="dv">2</span><span class="sc">:</span><span class="fu">ncol</span>(x)])</span>
+<span id="cb68-3"><a href="exercises.html#cb68-3" tabindex="-1"></a></span>
+<span id="cb68-4"><a href="exercises.html#cb68-4" tabindex="-1"></a><span class="co"># remove low expression ones</span></span>
+<span id="cb68-5"><a href="exercises.html#cb68-5" tabindex="-1"></a>to_remove <span class="ot">&lt;-</span> edgeR<span class="sc">::</span><span class="fu">filterByExpr</span>(x_cpm, <span class="at">min.count =</span> <span class="dv">3</span>)</span></code></pre></div>
+<pre><code>## No group or design set. Assuming all samples belong to one group.</code></pre>
+<div class="sourceCode" id="cb70"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb70-1"><a href="exercises.html#cb70-1" tabindex="-1"></a>x_cpm_filtered <span class="ot">&lt;-</span> x_cpm[to_remove,]</span>
+<span id="cb70-2"><a href="exercises.html#cb70-2" tabindex="-1"></a></span>
+<span id="cb70-3"><a href="exercises.html#cb70-3" tabindex="-1"></a><span class="fu">plot_box</span>(x_cpm_filtered, <span class="at">main =</span> <span class="st">&quot;GSE119732 Boxplot: Filtered out lowly expressed&quot;</span>)</span></code></pre></div>
+<p><img src="06-exercises_files/figure-html/unnamed-chunk-8-1.png" alt="" width="672" /></p>
+</div>
+<div id="density-with-expression-3-removed" class="section level4 hasAnchor" number="6.1.4.2">
+<h4><span class="header-section-number">6.1.4.2</span> Density with expression &lt;3 removed<a href="exercises.html#density-with-expression-3-removed" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<div class="sourceCode" id="cb71"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb71-1"><a href="exercises.html#cb71-1" tabindex="-1"></a><span class="fu">plot_density</span>(x_cpm_filtered, <span class="at">main =</span> <span class="st">&quot;GSE119732 Density: Filtered out lowly expressed&quot;</span>)</span></code></pre></div>
+<p><img src="06-exercises_files/figure-html/unnamed-chunk-9-1.png" alt="" width="672" /></p>
+</div>
+</div>
 </div>
 <div id="exercise-2-httpswww.ncbi.nlm.nih.govgeoqueryacc.cgiaccgse122380" class="section level2 hasAnchor" number="6.2">
 <h2><span class="header-section-number">6.2</span> Exercise 2 — <a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE122380" class="uri">https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE122380</a><a href="exercises.html#exercise-2-httpswww.ncbi.nlm.nih.govgeoqueryacc.cgiaccgse122380" class="anchor-section" aria-label="Anchor link to header"></a></h2>
@@ -226,10 +389,109 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li>Add colours to the plot separating the different variables in the model</li>
 <li>Filter out lowly expressed genes and re plot the distributions.</li>
 </ol>
+<div id="question-1-1" class="section level3 hasAnchor" number="6.2.1">
+<h3><span class="header-section-number">6.2.1</span> Question 1<a href="exercises.html#question-1-1" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div id="check-for-version-suffixes" class="section level4 hasAnchor" number="6.2.1.1">
+<h4><span class="header-section-number">6.2.1.1</span> Check for version suffixes<a href="exercises.html#check-for-version-suffixes" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<div class="sourceCode" id="cb72"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb72-1"><a href="exercises.html#cb72-1" tabindex="-1"></a>gse <span class="ot">&lt;-</span> <span class="st">&quot;GSE122380&quot;</span></span>
+<span id="cb72-2"><a href="exercises.html#cb72-2" tabindex="-1"></a><span class="fu">fetch_geo_supp</span>(<span class="at">gse =</span> gse)</span></code></pre></div>
+<pre><code>## Setting options(&#39;download.file.method.GEOquery&#39;=&#39;auto&#39;)</code></pre>
+<pre><code>## Setting options(&#39;GEOquery.inmemory.gpl&#39;=FALSE)</code></pre>
+<pre><code>## Using locally cached version of supplementary file(s) GSE122380 found here:
+## data/GSE122380/GSE122380_Supplementary_Data_Table_S1.xlsx</code></pre>
+<pre><code>## Using locally cached version of supplementary file(s) GSE122380 found here:
+## data/GSE122380/GSE122380_raw_counts.txt.gz</code></pre>
+<div class="sourceCode" id="cb77"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb77-1"><a href="exercises.html#cb77-1" tabindex="-1"></a>path <span class="ot">&lt;-</span> <span class="fu">file.path</span>(<span class="st">&quot;data&quot;</span>, <span class="st">&quot;GSE122380&quot;</span>)</span>
+<span id="cb77-2"><a href="exercises.html#cb77-2" tabindex="-1"></a>files <span class="ot">&lt;-</span> <span class="fu">list.files</span>(path, <span class="at">pattern =</span> <span class="st">&quot;</span><span class="sc">\\</span><span class="st">.txt.gz$|</span><span class="sc">\\</span><span class="st">.tsv.gz$|</span><span class="sc">\\</span><span class="st">.csv.gz$&quot;</span>, </span>
+<span id="cb77-3"><a href="exercises.html#cb77-3" tabindex="-1"></a>                    <span class="at">full.names =</span> <span class="cn">TRUE</span>, <span class="at">recursive =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb77-4"><a href="exercises.html#cb77-4" tabindex="-1"></a></span>
+<span id="cb77-5"><a href="exercises.html#cb77-5" tabindex="-1"></a>x<span class="ot">&lt;-</span> <span class="fu">safe_read</span>(files[<span class="dv">1</span>])</span></code></pre></div>
+<pre><code>## Warning: One or more parsing issues, call `problems()` on your data frame for details,
+## e.g.:
+##   dat &lt;- vroom(...)
+##   problems(dat)</code></pre>
+<pre><code>## Parsing issues detected in TSV — reading as space-delimited file instead.</code></pre>
+<div class="sourceCode" id="cb80"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb80-1"><a href="exercises.html#cb80-1" tabindex="-1"></a><span class="co"># Count how many total contain a &quot;.&quot;</span></span>
+<span id="cb80-2"><a href="exercises.html#cb80-2" tabindex="-1"></a>dot_count <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">grepl</span>(<span class="st">&quot;</span><span class="sc">\\</span><span class="st">.&quot;</span>, x<span class="sc">$</span>gene_id))</span></code></pre></div>
+<pre><code>## Warning: Unknown or uninitialised column: `gene_id`.</code></pre>
+<div class="sourceCode" id="cb82"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb82-1"><a href="exercises.html#cb82-1" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">&quot;Total number of IDs with version suffixes:&quot;</span>, dot_count))</span></code></pre></div>
+<pre><code>## [1] &quot;Total number of IDs with version suffixes: 0&quot;</code></pre>
+<p>ID column <strong>does not</strong> contains Ensembl IDs with version suffixes.</p>
+</div>
+<div id="raw-density-plot-1" class="section level4 hasAnchor" number="6.2.1.2">
+<h4><span class="header-section-number">6.2.1.2</span> Raw Density Plot<a href="exercises.html#raw-density-plot-1" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<div class="sourceCode" id="cb84"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb84-1"><a href="exercises.html#cb84-1" tabindex="-1"></a><span class="fu">plot_box</span>(x[,<span class="dv">2</span><span class="sc">:</span><span class="fu">ncol</span>(x)], <span class="at">main =</span> <span class="st">&quot;GSE122380 Raw Boxplot&quot;</span>)</span></code></pre></div>
+<p><img src="06-exercises_files/figure-html/unnamed-chunk-11-1.png" alt="" width="672" /></p>
+</div>
+<div id="raw-density-plot-2" class="section level4 hasAnchor" number="6.2.1.3">
+<h4><span class="header-section-number">6.2.1.3</span> Raw Density Plot<a href="exercises.html#raw-density-plot-2" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<div class="sourceCode" id="cb85"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb85-1"><a href="exercises.html#cb85-1" tabindex="-1"></a><span class="fu">plot_density</span>(x[,<span class="dv">2</span><span class="sc">:</span><span class="fu">ncol</span>(x)], <span class="at">main =</span> <span class="st">&quot;GSE122380 Raw Density&quot;</span>)</span></code></pre></div>
+<p><img src="06-exercises_files/figure-html/unnamed-chunk-12-1.png" alt="" width="672" /></p>
+</div>
+</div>
+<div id="question-2-2" class="section level3 hasAnchor" number="6.2.2">
+<h3><span class="header-section-number">6.2.2</span> Question 2<a href="exercises.html#question-2-2" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div id="boxplot-by-patient-1" class="section level4 hasAnchor" number="6.2.2.1">
+<h4><span class="header-section-number">6.2.2.1</span> Boxplot by patient<a href="exercises.html#boxplot-by-patient-1" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<div class="sourceCode" id="cb86"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb86-1"><a href="exercises.html#cb86-1" tabindex="-1"></a>samples <span class="ot">&lt;-</span> <span class="fu">colnames</span>(x)[<span class="dv">2</span><span class="sc">:</span><span class="fu">ncol</span>(x)]</span>
+<span id="cb86-2"><a href="exercises.html#cb86-2" tabindex="-1"></a>sample_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">samples =</span> samples) <span class="sc">%&gt;%</span></span>
+<span id="cb86-3"><a href="exercises.html#cb86-3" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb86-4"><a href="exercises.html#cb86-4" tabindex="-1"></a>    <span class="at">patient =</span> <span class="fu">sub</span>(<span class="st">&quot;_.*&quot;</span>, <span class="st">&quot;&quot;</span>, samples),</span>
+<span id="cb86-5"><a href="exercises.html#cb86-5" tabindex="-1"></a>    <span class="at">timepoint =</span> <span class="fu">sub</span>(<span class="st">&quot;.*_&quot;</span>, <span class="st">&quot;&quot;</span>, samples)</span>
+<span id="cb86-6"><a href="exercises.html#cb86-6" tabindex="-1"></a>  )</span>
+<span id="cb86-7"><a href="exercises.html#cb86-7" tabindex="-1"></a>sample_data<span class="sc">$</span>timepoint <span class="ot">&lt;-</span> <span class="fu">factor</span>(sample_data<span class="sc">$</span>timepoint, </span>
+<span id="cb86-8"><a href="exercises.html#cb86-8" tabindex="-1"></a>                                <span class="at">levels =</span> <span class="fu">as.character</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">15</span>))</span>
+<span id="cb86-9"><a href="exercises.html#cb86-9" tabindex="-1"></a></span>
+<span id="cb86-10"><a href="exercises.html#cb86-10" tabindex="-1"></a>raw_mat <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(x[,<span class="dv">2</span><span class="sc">:</span><span class="fu">ncol</span>(x)])</span>
+<span id="cb86-11"><a href="exercises.html#cb86-11" tabindex="-1"></a><span class="fu">rownames</span>(raw_mat) <span class="ot">&lt;-</span> x[[<span class="dv">1</span>]]</span>
+<span id="cb86-12"><a href="exercises.html#cb86-12" tabindex="-1"></a></span>
+<span id="cb86-13"><a href="exercises.html#cb86-13" tabindex="-1"></a><span class="co"># Generate the plots</span></span>
+<span id="cb86-14"><a href="exercises.html#cb86-14" tabindex="-1"></a><span class="fu">plot_box_by_var</span>(raw_mat, sample_data, <span class="st">&quot;patient&quot;</span>, <span class="at">main =</span> <span class="st">&quot;GSE122380 Raw: Boxplot by Patient&quot;</span>)</span></code></pre></div>
+<p><img src="06-exercises_files/figure-html/unnamed-chunk-13-1.png" alt="" width="672" /></p>
+</div>
+<div id="density-by-patient-1" class="section level4 hasAnchor" number="6.2.2.2">
+<h4><span class="header-section-number">6.2.2.2</span> Density by patient<a href="exercises.html#density-by-patient-1" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<div class="sourceCode" id="cb87"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb87-1"><a href="exercises.html#cb87-1" tabindex="-1"></a><span class="fu">plot_density_by_var</span>(raw_mat, sample_data, <span class="st">&quot;patient&quot;</span>, <span class="at">main =</span> <span class="st">&quot;GSE122380 Raw: Density by Patient&quot;</span>)</span></code></pre></div>
+<p><img src="06-exercises_files/figure-html/unnamed-chunk-14-1.png" alt="" width="672" /></p>
+</div>
+<div id="boxplot-by-timepoint" class="section level4 hasAnchor" number="6.2.2.3">
+<h4><span class="header-section-number">6.2.2.3</span> Boxplot by Timepoint<a href="exercises.html#boxplot-by-timepoint" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<div class="sourceCode" id="cb88"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb88-1"><a href="exercises.html#cb88-1" tabindex="-1"></a><span class="fu">plot_box_by_var</span>(raw_mat, sample_data, <span class="st">&quot;timepoint&quot;</span>, <span class="st">&quot;GSE122380 Raw: Boxplot by Timepoint&quot;</span>)</span></code></pre></div>
+<p><img src="06-exercises_files/figure-html/unnamed-chunk-15-1.png" alt="" width="672" /></p>
+</div>
+<div id="density-by-timepoint" class="section level4 hasAnchor" number="6.2.2.4">
+<h4><span class="header-section-number">6.2.2.4</span> Density by Timepoint<a href="exercises.html#density-by-timepoint" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<div class="sourceCode" id="cb89"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb89-1"><a href="exercises.html#cb89-1" tabindex="-1"></a><span class="fu">plot_density_by_var</span>(raw_mat, sample_data, <span class="st">&quot;timepoint&quot;</span>, <span class="st">&quot;GSE122380 Raw: Density by Timepoint&quot;</span>)</span></code></pre></div>
+<p><img src="06-exercises_files/figure-html/unnamed-chunk-16-1.png" alt="" width="672" /></p>
+</div>
+</div>
+<div id="question-2-3" class="section level3 hasAnchor" number="6.2.3">
+<h3><span class="header-section-number">6.2.3</span> Question 2<a href="exercises.html#question-2-3" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div id="boxplot-with-expression-3-removed-1" class="section level4 hasAnchor" number="6.2.3.1">
+<h4><span class="header-section-number">6.2.3.1</span> Boxplot with expression &lt;3 removed<a href="exercises.html#boxplot-with-expression-3-removed-1" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<div class="sourceCode" id="cb90"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb90-1"><a href="exercises.html#cb90-1" tabindex="-1"></a><span class="co"># Convert the raw counts to Counts per million</span></span>
+<span id="cb90-2"><a href="exercises.html#cb90-2" tabindex="-1"></a>x_cpm <span class="ot">&lt;-</span> <span class="fu">cpm</span>(<span class="at">y =</span> x[,<span class="dv">2</span><span class="sc">:</span><span class="fu">ncol</span>(x)])</span>
+<span id="cb90-3"><a href="exercises.html#cb90-3" tabindex="-1"></a></span>
+<span id="cb90-4"><a href="exercises.html#cb90-4" tabindex="-1"></a><span class="co"># remove low expression ones</span></span>
+<span id="cb90-5"><a href="exercises.html#cb90-5" tabindex="-1"></a>to_remove <span class="ot">&lt;-</span> edgeR<span class="sc">::</span><span class="fu">filterByExpr</span>(x_cpm, <span class="at">min.count =</span> <span class="dv">3</span>)</span></code></pre></div>
+<pre><code>## No group or design set. Assuming all samples belong to one group.</code></pre>
+<div class="sourceCode" id="cb92"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb92-1"><a href="exercises.html#cb92-1" tabindex="-1"></a>x_cpm_filtered <span class="ot">&lt;-</span> x_cpm[to_remove,]</span>
+<span id="cb92-2"><a href="exercises.html#cb92-2" tabindex="-1"></a></span>
+<span id="cb92-3"><a href="exercises.html#cb92-3" tabindex="-1"></a><span class="fu">plot_box</span>(x_cpm_filtered, <span class="at">main =</span> <span class="st">&quot;GSE122380 Boxplot: Filtered out lowly expressed&quot;</span>)</span></code></pre></div>
+<p><img src="06-exercises_files/figure-html/unnamed-chunk-17-1.png" alt="" width="672" /></p>
+</div>
+<div id="density-with-expression-3-removed-1" class="section level4 hasAnchor" number="6.2.3.2">
+<h4><span class="header-section-number">6.2.3.2</span> Density with expression &lt;3 removed<a href="exercises.html#density-with-expression-3-removed-1" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<div class="sourceCode" id="cb93"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb93-1"><a href="exercises.html#cb93-1" tabindex="-1"></a><span class="fu">plot_density</span>(x_cpm_filtered, <span class="at">main =</span> <span class="st">&quot;GSE122380 Density: Filtered out lowly expressed&quot;</span>)</span></code></pre></div>
+<p><img src="06-exercises_files/figure-html/unnamed-chunk-18-1.png" alt="" width="672" /></p>
+</div>
+</div>
 </div>
 <div id="exercise-3--" class="section level2 hasAnchor" number="6.3">
 <h2><span class="header-section-number">6.3</span> Exercise 3 -<a href="exercises.html#exercise-3--" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>Can you use the worked example to process the above two GEO records? How?</p>
+<p>Yes, but need modifications such as creating a design to distinguish variable
+and might need stripping version numbers depends on the data type.</p>
 
 </div>
 </div>

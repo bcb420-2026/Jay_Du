@@ -14,6 +14,12 @@ Using **GSE119732**, confirm whether the ID column contains Ensembl IDs with ver
 ### Helper functions
 
 ```{r}
+# Load Library
+library(tibble)
+library(readr)
+library(dplyr)
+
+
 # Print first n from head
 kable_head <- function(x, n = 5, caption = NULL) {
   knitr::kable(utils::head(x, n), caption = caption)
@@ -53,11 +59,10 @@ source("./fetch_geo_supp.R")
 ```
 
 
-### 1. 
+### Question 1 
 ```{r}
 gse <- "GSE119732"
 pattern <- "GSE119732.*\\.gz"
-fetch_geo_supp(gse = gse)
 
 path <- file.path("data", gse)
 files <- list.files(path, pattern = pattern, 
@@ -72,7 +77,7 @@ kable_head(x[, 1:min(6, ncol(x))], 20, paste(gse,": raw table preview"))
 ```
 
 
-### 2.
+### Question 2
 ```{r}
 # Extract the first 20 IDs
 first_20_ids <- head(x$gene_id, 20)
@@ -90,7 +95,7 @@ All 20 from the 1st 20 have a ".", all 58037 ids of this whole set
 have a ".".
 
 
-### 3. 
+### Question 3 
 ```{r}
 
 # Apply to your tibble 'x'
@@ -103,7 +108,7 @@ kable_head(tibble(raw_id = head(ids, 10),
 ```
 
 
-### 4.
+### Question 4
 ```{r}
 if (any(grepl("^ENSG", strip_ensembl_version(ids)))) {
   library(biomaRt)
@@ -139,13 +144,10 @@ Using **GSE122380**, confirm whether the ID column contains Ensembl IDs with ver
 4. What is different about this file? 
 
 
-### 1. 
+### Question 1 
 ```{r}
 gse <- "GSE122380"
 pattern <- "GSE122380.*\\.gz"
-
-source("./fetch_geo_supp.R")
-fetch_geo_supp(gse = gse)
 
 path <- file.path("data", gse)
 files <- list.files(path, pattern = pattern, 
@@ -160,7 +162,7 @@ kable_head(x[, 1:min(6, ncol(x))], 20, paste(gse,": raw table preview"))
 ```
 
 
-### 2.
+### Question 2
 ```{r}
 # Extract the first 20 IDs
 first_20_ids <- head(x$gene_id, 20)
@@ -178,7 +180,7 @@ print(paste("Total number of IDs with version suffixes:", dot_count))
 dpn't have a ".".
 
 
-### 3. 
+### Question 3 
 ```{r}
 
 # Define the ID column name
@@ -216,8 +218,10 @@ if (any(grepl("^ENSG", ids))) {
 ```
 
 
-### 4.
-GSE122380 uses stable Ensembl IDs without version suffixes, whereas your previous file used versioned IDs (e.g., .5) that required stripping, which made is simpler to map to HGNC.
+### Question 4
+GSE122380 uses stable Ensembl IDs without version suffixes, whereas your 
+previous file used versioned IDs (e.g., .5) that required stripping, 
+which made is simpler to map to HGNC.
 
 
 ## Exercise 3 - 
