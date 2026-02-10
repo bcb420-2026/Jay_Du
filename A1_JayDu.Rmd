@@ -113,7 +113,7 @@ gene is disrupted,the lungs become significantly more vulnerable to
 environmental damage [@karlsson2013gpr126].
 
 To explore how this gene influences lung function under both normal air and 
-cigarette smoke conditions in humans, @werder2023adgrg6 started an ivestigation
+cigarette smoke conditions in humans, @werder2023adgrg6 started an investigation
 utilizing induced iAT2s—lab-grown versions derived from pluripotent stem cells(PSC).
 
 <br>
@@ -261,7 +261,7 @@ As library size ranges from 40000000 to 80000000, normalization is required to a
 ## Raw Boxplot & Density plot [@norm_exercise] {#raw_plot}
 
 **Boxplot:**
-```{r, fig.cap="Boxplot showing the distribution of log2-transformed raw read counts for all twelve samples in GSE223077. The x-axis represents individual samples, while the y-axis shows log2(gene expression counts + 1). The plot illustrates the baseline variation in library sizes and the presence of lowly expressed genes (near zero) prior to TMM normalization and filtering."}
+```{r, fig.cap="Boxplot showing the distribution of log2-transformed raw read counts for all twelve samples in GSE223077. The x-axis represents individual samples, while the y-axis shows log2(gene expression counts + 1). The plot illustrates the baseline variation in library sizes and the presence of lowly-expressed genes (near zero) prior to TMM normalization and filtering."}
 
 plot_box(counts, 
          main = "GSE223077 Log2 Gene Expression Raw Counts Boxplot",
@@ -337,7 +337,7 @@ if(any_dupes) {
 ## Filtering lowly-expressed genes {#filter_low}
 
 Low-expression genes are filtered using *filterByExpr* from **edgeR** [@robinson2010edger].
-Filtering these "transcriptomic outliers" is a critical prerequisite for 
+Filtering these lowly-expressed genes is a critical prerequisite for 
 differential expression testing, as it increases statistical power by reducing 
 the burden of multiple hypothesis testing and eliminates the heteroscedasticity 
 typically associated with near-zero counts.
@@ -349,7 +349,7 @@ dge <- DGEList(counts = counts_hugo)
 # Attach metadata
 dge$samples <- cbind(dge$samples, metadata)
 
-# Filter lowly expressed genes
+# Filter lowly-expressed genes
 keep <- edgeR::filterByExpr(dge, design)
 dge_f <- dge[keep, , keep.lib.sizes = FALSE]
 
@@ -685,7 +685,7 @@ While this initial analysis focused on the wild-type response to smoke, the next
 - I did not remove any individual samples as technical outliers, as the MDS 
   plot confirmed that all twelve biological replicates clustered appropriately 
   within their respective experimental groups. However, I removed 13,021 
-  features that were considered "transcriptomic outliers" or noise. This 
+  features that were considered lowly-expressed genes or noise. This 
   included genes with non-HUGO identifiers and those that failed to meet the 
   filterByExpr threshold, ensuring that the remaining genes had sufficient 
   read counts for a statistically robust analysis.
