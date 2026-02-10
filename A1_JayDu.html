@@ -1879,11 +1879,13 @@ Figure 3.2: Density plot showing the frequency distribution of log2-transformed 
 </div>
 <div id="mapping" class="section level2" number="3.3">
 <h2><span class="header-section-number">3.3</span> Identity mapping</h2>
-<p>As this dataset used a mix of identifiers includes:
-- HUGO (e.g. A3GALT2)
-- Ensembl-style novel locus / predicted gene (e.g. AL137802.1)
-- Long intergenic non-coding RNA (lncRNA) (e.g. LINC01646)
-- Chromosome open reading frame (protein-coding) (e.g. C1orf159)</p>
+<p>As this dataset used a mix of identifiers includes:</p>
+<ul>
+<li>HUGO (e.g. A3GALT2)</li>
+<li>Ensembl-style novel locus / predicted gene (e.g. AL137802.1)</li>
+<li>Long intergenic non-coding RNA (lncRNA) (e.g. LINC01646)</li>
+<li>Chromosome open reading frame (protein-coding) (e.g. C1orf159)</li>
+</ul>
 <p>Other non HUGO attributes was unable to be mapped to HUGO symbols. Therefore, we will be
 analyzing those with valid HUGO identifiers only(~ 2/3 of the whole set).</p>
 <pre class="r"><code>library(biomaRt)

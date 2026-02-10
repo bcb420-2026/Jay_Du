@@ -278,10 +278,11 @@ plot_density(counts, main = "GSE223077 Log2 Gene Expression Raw Counts Density P
 ## Identity mapping {#mapping}
 
 As this dataset used a mix of identifiers includes:
-  - HUGO (e.g. A3GALT2)
-  - Ensembl-style novel locus / predicted gene (e.g. AL137802.1)
-  - Long intergenic non-coding RNA (lncRNA) (e.g. LINC01646)
-  - Chromosome open reading frame (protein-coding) (e.g. C1orf159)
+
+- HUGO (e.g. A3GALT2)
+- Ensembl-style novel locus / predicted gene (e.g. AL137802.1)
+- Long intergenic non-coding RNA (lncRNA) (e.g. LINC01646)
+- Chromosome open reading frame (protein-coding) (e.g. C1orf159)
 
 Other non HUGO attributes was unable to be mapped to HUGO symbols. Therefore, we will be 
 analyzing those with valid HUGO identifiers only(~ 2/3 of the whole set).
