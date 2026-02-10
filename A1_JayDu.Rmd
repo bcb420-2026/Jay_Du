@@ -95,7 +95,10 @@ pressure we put on our lung cells.
 
 <br>
 
-![Smoke from cigarette (Lukas, n.d.)](data/cigerette.jpg)
+<div align="center">
+  <img src="data/cigerette.jpg" width="80%" />
+  <p><strong>Figure 1.1: Smoke from cigarette (Lukas, n.d.)</strong></p>
+</div>
 
 <br>
 
@@ -111,19 +114,50 @@ the lungs become significantly more vulnerable to environmental damage
 
 To explore how this gene influences lung function under both normal air and 
 cigarette smoke conditions in humans, @werder2023adgrg6 utilized induced 
-iAT2s—lab-grown versions derived from pluripotent stem cells. These serve
-as a high-fidelity model to observe how genetics and toxic environments collide 
-at a molecular level within a controlled environment.
+iAT2s—lab-grown versions derived from pluripotent stem cells(PSC).
 
-This report presents an independent computational analysis of the dataset 
-**GSE223077** [@werder2023adgrg6]. In their experiment, the authors used CRISPRi
-to "knock down" ADGRG6 and observe how human iAT2 cells respond to the chemical
-assault of cigarette smoke. By re-processing their raw count data through my own
-differential expression pipeline, I aim to validate their findings and further 
-investigate the genetic trends in expression. For me, this project is about more
-than just data; it is about understanding the molecular breakdown behind the 
-chronic symptoms I see in my own home and exploring the science that might one 
-day help people like my father.
+<br>
+
+<div align="center">
+  <img src="data/experiment_design.jpg" width="80%" />
+  <p><strong>Figure 1.2: Experiment Overview</strong> [@werder2023adgrg6]</p>
+</div>
+
+<br>
+
+These "blank slate" cells underwent a multi-stage directed differentiation 
+protocol—moving from definitive endoderm to NKX2-1+ lung progenitors—using a 
+precise cocktail of growth factors (such as BMP4 and CHIR99021) and 3D Matrigel 
+culture to mature into functional Alveolar Type 2 (iAT2) cells 
+[@werder2023adgrg6]. To investigate the role of the COPD-linked gene ADGRG6, 
+the team employed a doxycycline-inducible CRISPR interference (CRISPRi) system 
+delivered via lentivirus; this targeted the gene's transcription start site to 
+achieve a 20%–50% reduction in expression, effectively mimicking the partial 
+loss of function seen in genetic risk factors [@werder2023adgrg6].
+
+### Experimental Design and Dataset Summary
+The researchers employed a **2x2 factorial design** to test the interaction between genetic 
+knockdown and environmental stress:
+
+- **Genotype:** CRISPRi knockdown of *ADGRG6* versus a non-targeting Wild-Type (WT) control.
+- **Exposure:** 24-hour treatment with cigarette smoke extract (CSE) versus a standard air control.
+
+The experiment includes **12 samples** in total, with 
+**three biological replicates per condition** [@werder2023adgrg6]. 
+This structure provides the statistical power necessary to distinguish between 
+baseline shifts caused by the *ADGRG6* deficiency and the acute transcriptional 
+responses triggered by smoke exposure [@werder2023adgrg6].
+
+
+### Project Goals
+This report presents an independent computational analysis of the **GSE223077** 
+dataset [@werder2023adgrg6]. By re-processing the raw count data through my own 
+differential expression pipeline, I aim to validate the authors' findings and 
+further investigate the specific genetic trends in expression. 
+For me, this project is about more than just data; it is about understanding the
+molecular breakdown behind the chronic symptoms I see in my own home and 
+exploring the science that might one day offer better interventions for 
+people like my father.
 
 
 ---
