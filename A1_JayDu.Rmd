@@ -1,5 +1,5 @@
 ---
-title: "Bulk RNA-seq of CRISPRi ADGRG6-kd iAT2 Following Cigarette Smoke Exposure"
+title: "GSE223077: Bulk RNA-seq of CRISPRi ADGRG6-kd iAT2 Following Cigarette Smoke Exposure"
 author: "Jay Du"
 date: "10 Feb 2026"
 output:
@@ -17,11 +17,11 @@ nocite: '@*'
 
 <style>
 body {
-  font-size: 18px;
+  font-size: 16px;
 }
 
 caption {
-  font-size: 16px;
+  font-size: 14px;
   font-style: italic;
 }
 </style>
@@ -49,8 +49,8 @@ library("tidyr")
 library("tibble")
 
 
-# Helper function for plotting based on lecture exercise
-plot_box <- function(mat, main = "", ylab = "log2(counts+1)") {
+# Helper function for plotting modified based on lecture exercise
+plot_box <- function(mat, main = "", xlab = "Sample", ylab = "log2(counts+1)") {
   df <- as.data.frame(mat)
   df_long <- df |>
     mutate(gene = rownames(df)) |>
@@ -61,11 +61,11 @@ plot_box <- function(mat, main = "", ylab = "log2(counts+1)") {
     geom_boxplot(outlier.size = 0.2) +
     theme_bw() +
     theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
-    labs(title = main, x = "Sample", y = ylab)
+    labs(title = main, x = xlab, y = ylab)
 }
 
 
-plot_density <- function(mat, main = "") {
+plot_density <- function(mat, main = "", xlab = "log2(counts+1)", ylab = "Density") {
   df <- as.data.frame(mat)
   df_long <- df |>
     mutate(gene = rownames(df)) |>
@@ -75,7 +75,7 @@ plot_density <- function(mat, main = "") {
   ggplot(df_long, aes(x = value, colour = sample)) +
     geom_density() +
     theme_bw() +
-    labs(title = main, x = "log2(counts+1)", y = "Density") +
+    labs(title = main, x = xlab, y = ylab) +
     guides(colour = "none")
 }
 ```
@@ -103,18 +103,18 @@ pressure we put on our lung cells.
 <br>
 
 This personal connection is why I chose a study specifically focused on the 
-effects of cigarette smoke for this assignment. The research centers on the 
+effects of cigarette smoke for this assignment. This research centers on the 
 true "first responders" of our lungs: Alveolar Type 2 (AT2) cells. These cells 
 act as the essential defense and repair crew for the tiny air sacs where we 
 breathe. Specifically, the authors investigated a gene called **ADGRG6** 
 (also known as GPR126), a "mechanosensor" that helps lung cells maintain 
-stability and repair themselves after injury. When this gene is disrupted, 
-the lungs become significantly more vulnerable to environmental damage 
-[@karlsson2013gpr126].
+stability and repair themselves after injury [@karlsson2013gpr126]. When this 
+gene is disrupted,the lungs become significantly more vulnerable to 
+environmental damage [@karlsson2013gpr126].
 
 To explore how this gene influences lung function under both normal air and 
-cigarette smoke conditions in humans, @werder2023adgrg6 utilized induced 
-iAT2s—lab-grown versions derived from pluripotent stem cells(PSC).
+cigarette smoke conditions in humans, @werder2023adgrg6 started an ivestigation
+utilizing induced iAT2s—lab-grown versions derived from pluripotent stem cells(PSC).
 
 <br>
 
@@ -136,8 +136,8 @@ achieve a 20%–50% reduction in expression, effectively mimicking the partial
 loss of function seen in genetic risk factors [@werder2023adgrg6].
 
 ### Experimental Design and Dataset Summary
-The researchers employed a **2x2 factorial design** to test the interaction between genetic 
-knockdown and environmental stress:
+The researchers employed a **2x2 factorial design** to test the interaction 
+between genetic knockdown and environmental stress:
 
 - **Genotype:** CRISPRi knockdown of *ADGRG6* versus a non-targeting Wild-Type (WT) control.
 - **Exposure:** 24-hour treatment with cigarette smoke extract (CSE) versus a standard air control.
@@ -154,10 +154,6 @@ This report presents an independent computational analysis of the **GSE223077**
 dataset [@werder2023adgrg6]. By re-processing the raw count data through my own 
 differential expression pipeline, I aim to validate the authors' findings and 
 further investigate the specific genetic trends in expression. 
-For me, this project is about more than just data; it is about understanding the
-molecular breakdown behind the chronic symptoms I see in my own home and 
-exploring the science that might one day offer better interventions for 
-people like my father.
 
 
 ---
@@ -166,13 +162,13 @@ people like my father.
 
 ## Dataset Selection {#ds_select}
 
-The **GSE223077** dataset was selected for this project because it provides a high-quality, high-resolution framework for investigating gene–environment interactions in the human lung. 
+The **GSE223077** dataset was qualified for this project because it provides a high-quality, high-resolution framework for investigating gene–environment interactions in the human lung. 
 
-The selection was based on the following criteria:
+The selection matches the following instructed criteria:
 
-* **Human Cell Model:** The experiment utilizes human iPSC-derived type II alveolar epithelial cells (iAT2s), a sophisticated model that accurately reflects the cellular environment of the human lung.
-* **Biological Relevance:** The experiment models a meaningful physiological response by combining a **genetic perturbation** (CRISPRi knockdown of the COPD-associated GWAS gene *ADGRG6*) with an **environmental exposure** (cigarette smoke). This interaction mirrors the clinical reality of chronic lung disease, where genetic vulnerability meets toxic exposure—a scenario particularly relevant given the environmental stressors impacting my father's lung health.
-* **Transcriptomic Coverage:** The data was generated via bulk RNA-seq, providing complete coverage of the protein-coding transcriptome (mapping to **20,530** validated HUGO genes in my pipeline), ensuring the analysis is not limited to a small subset of genes.
+* **Human Cell Model:** The experiment utilizes human iPSC-derived type II alveolar epithelial cells (iAT2s), a sophisticated model that accurately reflects the cellular environment of the human lung [@werder2023adgrg6].
+* **Biological Relevance:** The experiment models a meaningful physiological response by combining a **genetic perturbation** (CRISPRi knockdown of the COPD-associated GWAS gene *ADGRG6*) with an **environmental exposure** (cigarette smoke) [@werder2023adgrg6]. This interaction mirrors the clinical reality of chronic lung disease, where genetic vulnerability meets toxic exposure—a scenario particularly relevant given the environmental stressors impacting my father's lung health.
+* **Transcriptomic Coverage:** The data was generated via bulk RNA-seq, providing complete coverage of the protein-coding transcriptome (mapping to **20,530** validated HUGO genes in my pipeline), ensuring the analysis is not limited to a small subset of genes [@werder2023adgrg6].
 * **Experimental Quality:** The study is recent (published in **2023**) and adheres to best-practice procedures, including the use of **three biological replicates** per condition across four experimental groups.
 
 By integrating CRISPRi-mediated knockdown with environmental assault, this dataset offers a biologically robust platform to explore how the loss of a key mechanosensor (*ADGRG6*) predisposes human lung cells to injury from cigarette smoke.
@@ -181,7 +177,7 @@ By integrating CRISPRi-mediated knockdown with environmental assault, this datas
 
 ## Downloading the dataset {#ds_dl}
 
-The dataset was downloaded programmatically using the *getGEOSuppFiles* function from **GEOquery** package from Bioconductor.
+The dataset was downloaded programmatically using the *getGEOSuppFiles* function from **GEOquery** package from Bioconductor [@robinson2010edger].
 
 ```{r}
 # Download supplementary files
@@ -204,15 +200,17 @@ counts <- read.table(counts_file, header = TRUE, row.names = 1, sep = "\t", chec
 
 A subset of the dataset is shown below:
 
-```{r, tab.cap="Table showing the HUGO gene symbol and raw transcript counts for the first six genes across a subset of the dataset. Each row represents a single gene identified by its HGNC symbol (e.g., MIR1302-2HG, FAM138A), and each column represents one of the twelve experimental samples. The numeric values denote the raw number of reads mapped to that specific gene locus before any normalization or filtering steps were applied."}
+```{r}
 head(counts)
 ```
 
+Table 2.1: This table shows the genetic symbol and raw transcript counts for the first six genes across a subset of the dataset. Rows represent genes identified by their various kind of symbols (e.g., MIR1302-2HG, FAM138A), and each column represents one of the twelve experimental samples. The numeric values denote the raw number of reads mapped to that specific gene locus before any normalization or filtering steps were applied.
+
+<br>
+
 Metadata is constructed to define experimental conditions:
 
-```{r, tab.cap="Table showing the experimental design and sample metadata for the GSE223077 series. Each row represents a unique RNA-seq library, and columns define the specific variables for each sample. 'Genotype' indicates whether the human iAT2 cells were Wild-Type (WT) or subjected to CRISPRi-mediated knockdown of the ADGRG6 mechanosensor (ADGRG6_kd). 'Exposure' identifies the treatment condition: Air (control) or Cigarette Smoke (test). The 'Sample' IDs correspond to the column names in the raw count matrix, where numbers 1–12 represent independent biological replicates."}
-
-
+```{r}
 metadata <- data.frame(
   sample   = names(counts),
   genotype = c(
@@ -230,10 +228,13 @@ metadata <- data.frame(
   stringsAsFactors = FALSE
 )
 
-knitr::kable(metadata, caption = )
+knitr::kable(metadata)
 ```
+Table 2.2: This table shows the experimental design and sample metadata for the GSE223077 series. Each row represents a unique RNA-seq library, and columns define the specific variables for each sample. 'Genotype' indicates whether the human iAT2 cells were Wild-Type (WT) or subjected to CRISPRi-mediated knockdown of the ADGRG6 mechanosensor (ADGRG6_kd). 'Exposure' identifies the treatment condition: Air (control) or Cigarette Smoke (test). The 'Sample' IDs correspond to the column names in the raw count matrix, where numbers 1–12 represent independent biological replicates.
 
-Design was set to model genotype effects, smoke effects, and whether smoke effects differ by genotype.
+<br>
+
+Design was set to model genotype effects and smoke effects.
 
 ```{r}
 metadata$group <- factor(paste(metadata$genotype, metadata$exposure, sep = "_"))
@@ -257,20 +258,22 @@ As library size ranges from 40000000 to 80000000, normalization is required to a
 
 ---
 
-## Raw Boxplot & Density plot {#raw_plot}
+## Raw Boxplot & Density plot [@norm_exercise] {#raw_plot}
 
 **Boxplot:**
 ```{r, fig.cap="Boxplot showing the distribution of log2-transformed raw read counts for all twelve samples in GSE223077. The x-axis represents individual samples, while the y-axis shows log2(gene expression counts + 1). The plot illustrates the baseline variation in library sizes and the presence of lowly expressed genes (near zero) prior to TMM normalization and filtering."}
 
-
-plot_box(counts, main = "GSE223077 Log2 Gene Expression Raw Counts Boxplot")
+plot_box(counts, 
+         main = "GSE223077 Log2 Gene Expression Raw Counts Boxplot",
+         ylab = "Log2 Gene Expression (Counts + 1)")
 ```
 
 **Density Plot:**
 ```{r, fig.cap="Density plot showing the frequency distribution of log2-transformed raw counts across the entire dataset. Each colored line represents one sample's transcriptomic profile. The prominent peak on the left side of the x-axis indicates a high proportion of genes with zero or very low expression, highlighting the necessity of the filterByExpr step to remove noise from the analysis."}
 
-
-plot_density(counts, main = "GSE223077 Log2 Gene Expression Raw Counts Density Plot")
+plot_density(counts, 
+             main = "GSE223077 Log2 Gene Expression Raw Counts vs Density Plot",
+             xlab = "Log2 Gene Expression (Counts + 1)")
 ```
 
 ---
@@ -284,12 +287,11 @@ As this dataset used a mix of identifiers includes:
 - Long intergenic non-coding RNA (lncRNA) (e.g. LINC01646)
 - Chromosome open reading frame (protein-coding) (e.g. C1orf159)
 
-Other non HUGO attributes was unable to be mapped to HUGO symbols. Therefore, we will be 
-analyzing those with valid HUGO identifiers only(~ 2/3 of the whole set).
+Mapping to HUGO was done using biomRt [@durinck2009mapping].
+Other non HUGO attributes was unable to be mapped to HUGO symbols. Therefore, 
+we will be analyzing those with valid HUGO identifiers only(~ 2/3 of the whole set).
 
 ```{r}
-library(biomaRt)
-
 # Connect to Ensembl (Human dataset)
 ensembl <- useMart("ensembl", dataset = "hsapiens_gene_ensembl")
 
@@ -334,15 +336,13 @@ if(any_dupes) {
 
 ## Filtering lowly-expressed genes {#filter_low}
 
-Low-expression genes are filtered using *filterByExpr* from **edgeR**.
+Low-expression genes are filtered using *filterByExpr* from **edgeR** [@robinson2010edger].
 Filtering these "transcriptomic outliers" is a critical prerequisite for 
 differential expression testing, as it increases statistical power by reducing 
 the burden of multiple hypothesis testing and eliminates the heteroscedasticity 
 typically associated with near-zero counts.
 
 ```{r}
-library(edgeR)
-
 # Create a DGEList (edgeR data container)
 dge <- DGEList(counts = counts_hugo)
 
@@ -360,11 +360,11 @@ nrow(dge_f)
 
 ---
 
-# Normalisation
+# Normalisation {#normalization}
 
 I applied Weighted Trimmed Mean of M-values (TMM) normalization to the dataset 
 to correct for composition biases that arise when a small number of highly 
-expressed genes consume a disproportionate share of the total sequencing depth.
+expressed genes consume a disproportionate share of the total sequencing depth [@robinson2010edger].
 By calculating a scaling factor based on the weighted mean of log-expression 
 ratios after trimming the top and bottom 30% of extreme values, TMM ensures 
 that the relative abundance of genes is comparable across libraries with varying
@@ -379,37 +379,43 @@ dge_f <- edgeR::calcNormFactors(dge_f, method = "TMM")
 
 **The final result:**
 
-```{r, tab.cap="The final data frame as required by Assignment 1 instructions."}
-# A dataframe with x numeric columns.
-# All rows have a unique HUGO symbols, 
-# and the HUGO symbols are defined as rownames of the dataframe.
+```{r}
 head(dge_f$counts)
 ```
+Table 4.1: The final data frame as required by Assignment 1 instructions.
 
+  - A dataframe with x numeric columns.
+  - All rows have a unique HUGO symbols, 
+  - HUGO symbols are defined as rownames of the dataframe.
 
-Post-normalisation visualisation:
+<br>
+
+## Post-normalisation visualisation: {#post_plot}
 
 **Boxplot (Post-normalization):**
 
 ```{r, fig.cap="Boxplot showing the distribution of log2-transformed counts per million (CPM) following TMM (Trimmed Mean of M-values) normalization and filtering. Compared to the raw counts, the medians and quartiles are now aligned across all samples, ensuring that technical differences in sequencing depth do not bias the subsequent differential expression analysis of the 15,080 retained genes."}
 
 
-plot_box(dge_f, main = "GSE223077 Log2 Counts Boxplot")
+plot_box(dge_f, 
+         main = "GSE223077 Log2 Gene Expression Counts Boxplot (Post Norm)",
+         ylab = "Log2 Gene Expression (Counts + 1)")
 ```
 
 **Density Plot (Post-normalization):**
 ```{r, fig.cap="Density plot of TMM-normalized log2-CPM values. The alignment of the peaks across all twelve samples confirms that the normalization process successfully standardized the expression distributions, allowing for valid comparisons of gene activity between the Air-exposed and Smoke-exposed lung cell conditions."}
 
-
-plot_density(dge_f, main = "GSE223077 Log2 Counts Boxplot")
+plot_density(dge_f, 
+             main = "GSE223077 Log2 Gene Expression Counts vs Density plot",
+             xlab = "Log2 Gene Expression (Counts + 1)")
 ```
 
 
 ---
 
-# Exploratory analysis
+# Exploratory analysis {#analysis}
 
-## MDS plot (Combined Group Analysis) {#mds}
+## MDS plot (Combined Group Analysis) [@robinson2010edger] {#mds}
 
 ```{r, fig.cap="Multi-dimensional Scaling (MDS) plot showing the leading log-fold change between samples based on the top 500 genes with the highest biological coefficient of variation in the GSE223077 dataset. Each point represents an individual RNA-seq library labeled by its experimental group: ADGRG6_kd_Air (Red), ADGRG6_kd_Smoke (Blue), WT_Air (Green), and WT_Smoke (Purple). By focusing on the top 500 most variable genes, the plot filters out stochastic background noise across the 15,080 genes to highlight the most dominant biological signals. The x-axis (Dimension 1) accounts for 36% of the total transcriptomic variance, primarily separating the samples by Genotype; this high percentage indicates that the CRISPRi-mediated loss of the ADGRG6 mechanosensor is the single most significant driver of cellular change in this experiment."}
 
@@ -422,30 +428,40 @@ group_levels <- levels(metadata$group)
 group_colors <- RColorBrewer::brewer.pal(n = 4, "Set1")
 names(group_colors) <- group_levels
 
+# Allos legend to be outside the image
+par(xpd = NA)
+par(mar = c(5, 4, 4, 12))
+
 # Generate the MDS plot
 plotMDS(dge_f,
   labels = metadata$group,
   col = group_colors[as.character(metadata$group)],
-  main = "MDS plot (Combined Group Analysis)"
+  main = "MDS plot (Combined Group Analysis)",
+  xlab = "MDS Dimension 1 (36% variance explained)",
+  ylab = "MDS Dimension 2 (18% variance explained)"
 )
 
 mtext("WT: Wild-Type, ADGRG6-kd: ADGRG6 knockdown", side = 3, line = 0.5, cex = 0.7)
 
 # Add the legend
 legend("topright",
+  inset = c(-0.45, 0),
   legend = names(group_colors),
   col = group_colors,
   pch = 16,
   bty = "n",
   cex = 0.8
 )
+
+# Reset to disallow further out of bound
+par(xpd = FALSE)
 ```
 
 ## log-CPM summary {#log_cpm}
 Transforming the raw transcript counts into log2-counts per million (log-CPM) 
 using the edgeR package was performed to normalize the data for varying 
 sequencing depths, which in this dataset ranged from 42,795,266 to 79,857,520 
-reads per library.
+reads per library [@robinson2010edger].
 
 ```{r}
 lcpm <- edgeR::cpm(dge_f, log = TRUE, prior.count = 1)
@@ -460,7 +476,7 @@ This provides an overview of expression distribution and variability.
 
 ## Fitting the QL model
 Following the log-CPM transformation, differential expression analysis is 
-performed using the **edgeR quasi-likelihood pipeline**.
+performed using the **edgeR quasi-likelihood pipeline** [@robinson2010edger] .
 
 ```{r}
 dge_f <- estimateDisp(dge_f, design)
@@ -469,12 +485,12 @@ fit <- glmQLFit(dge_f, design)
 
 ---
 
-## BCV plot
+## BCV plot [@robinson2010edger] {#bcv}
+
 Biological Coefficient of Variation (BCV) plot shows the relationship between 
 gene abundance (Average Log CPM) and the variability between biological replicates. 
 
 ```{r, fig.cap="The 'Common' dispersion (red line) and 'Trended' dispersion (blue line) provide an estimate of the overall noise in the dataset, which is used by the edgeR model to distinguish true biological changes from technical or stochastic variation."}
-
 
 plotBCV(dge_f)
 ```
@@ -482,10 +498,8 @@ plotBCV(dge_f)
 
 ## Test the contrast {#contrast}
 
-**Example contrast:**
-```{r, tab.cap="Table showing the top 6 differentially expressed genes for the comparison between Wild-Type (WT) Air and WT Smoke exposure, calculated using the edgeR quasi-likelihood F-test pipeline. Each row represents a single gene identified by its HGNC symbol. Columns provide statistical metrics for the 'Air_vs_Smoke' contrast: 'logFC' represents the log2 fold-change, where positive values denote higher expression in Air-exposed cells and negative values indicate up-regulation in response to Cigarette Smoke; 'logCPM' indicates the average log2 counts per million across all samples; 'F' is the quasi-likelihood F-statistic; 'PValue' is the raw probability value; and 'FDR' is the False Discovery Rate adjusted for multiple testing using the Benjamini-Hochberg method. These top hits, including detoxification genes like CYP1B1, characterize the molecular response to the same environmental stressors that drive the chronic respiratory symptoms observed in heavy smokers."}
-
-
+**Example contrast with edgeR [@robinson2010edger] :**
+```{r}
 contrast <- makeContrasts(
   "Air_vs_Smoke" = groupWT_Air - groupWT_Smoke,
   "ADGRG6_kd_vs_WT" = groupADGRG6_kd_Air - groupWT_Air,
@@ -503,12 +517,13 @@ tab_kd_smoke_vs_wt_air <- topTags(qlf_kd_smoke_vs_wt_air, n = Inf)$table %>% row
 
 knitr::kable(head(tab_air_vs_smoke))
 ```
+Table 6.1: This table showing the top 6 differentially expressed genes for the comparison between Wild-Type (WT) Air and WT Smoke exposure, calculated using the edgeR quasi-likelihood F-test pipeline. Each row represents a single gene identified by its HGNC symbol. Columns provide statistical metrics for the 'Air_vs_Smoke' contrast: 'logFC' represents the log2 fold-change, where positive values denote higher expression in Air-exposed cells and negative values indicate up-regulation in response to Cigarette Smoke; 'logCPM' indicates the average log2 counts per million across all samples; 'F' is the quasi-likelihood F-statistic; 'PValue' is the raw probability value; and 'FDR' is the False Discovery Rate adjusted for multiple testing using the Benjamini-Hochberg method. These top hits, including detoxification genes like CYP1B1, characterize the molecular response to the same environmental stressors that drive the chronic respiratory symptoms observed in heavy smokers.
 
 ---
 
-## Visualisation
+## Visualisation {#visualization}
 
-### Volcano plot {#volcano}
+### Volcano plot [@robinson2010edger] {#volcano}
 
 ```{r, fig.cap="Volcano plot showing the relationship between magnitude of change (log2 fold-change) and statistical significance (-log10 p-value) for the comparison between Wild-Type Air and WT Smoke exposure. Each point represents a gene; red points denote significantly up-regulated genes, blue points denote significantly down-regulated genes (FDR < 0.05), and grey points represent genes that did not reach the significance threshold."}
 volcano_df <- tab_air_vs_smoke %>%
@@ -537,13 +552,13 @@ ggplot(volcano_df, aes(x = logFC, y = neglog10P)) +
 ```
 
 
-### Heatmap {#heatmap}
+### Heatmap [@complexheatmap2022] {#heatmap}
 
-```{r, fig.cap="Heatmap of the top 30 differentially expressed genes (ranked by FDR) across all samples. Rows represent individual genes and are clustered by expression similarity, while columns are manually ordered by Genotype (Red: ADGRG6_kd, Blue: WT) and Exposure (Green: Air, Purple: Smoke) to show a clean transition. Cell colors represent row-standardized Z-scores, where red indicates higher-than-average expression and blue indicates lower-than-average expression for that specific gene."}
-# Define the genes to include (Top 30 DEGs)
+```{r, fig.cap="Heatmap of the top 20 differentially expressed genes (ranked by FDR) across all samples. Rows represent individual genes and are clustered by expression similarity, while columns are manually ordered by Genotype (Red: ADGRG6_kd, Blue: WT) and Exposure (Green: Air, Purple: Smoke) to show a clean transition. Cell colors represent row-standardized Z-scores, where red indicates higher-than-average expression and blue indicates lower-than-average expression for that specific gene."}
+# Define the genes to include (Top 20 DEGs)
 top_genes <- tab_air_vs_smoke %>%
   arrange(FDR, PValue) %>%
-  slice_head(n = 30)
+  slice_head(n = 20)
 
 # Reorder samples by genotype and exposure for a clean visual transition
 sorted_indices <- order(metadata$genotype, metadata$exposure)
@@ -583,15 +598,28 @@ ComplexHeatmap::Heatmap(
   col = col,
   name = "Relative gene expression (Z-score)",
   top_annotation = annot,
-  show_row_names = TRUE,
+  
+  # Main Title
+  column_title = paste0("Top ", nrow(expr_change_z), " DEGs: ADGRG6-kd Smoke vs WT Smoke"),
+  column_title_side = "top",
+  column_title_gp = grid::gpar(fontsize = 14, fontface = "bold"),
+  
+  # Y-axis
+  row_title = "HUGO Symbol",
+  row_title_side = "left",
+  row_title_gp = grid::gpar(fontsize = 12, fontface = "bold"),
+  row_names_side = "left",
   row_names_gp = grid::gpar(fontsize = 8),
+
+  # X-axis
   column_names_rot = 45,
+  column_names_gp = grid::gpar(fontsize = 8),
   column_names_centered = FALSE,
+  
+  show_row_names = TRUE,
   show_column_names = TRUE,
   cluster_rows = TRUE,       # Cluster genes by similarity
   cluster_columns = FALSE,   # Keep our manual Genotype/Exposure order
-  row_title = paste0("Top ", nrow(expr_change_z), " DEGs: ADGRG6-kd Smoke vs WT Smoke"),
-  column_title = "Samples",
   heatmap_legend_param = list(title = "Relative\nExpression")
 )
 
@@ -599,11 +627,13 @@ ComplexHeatmap::Heatmap(
 
 ---
 
-# Conclusions
+# Conclusions {#conclusion}
 
 This project successfully characterized the transcriptomic response of iPSC-derived type II alveolar epithelial cells to genetic and environmental stressors using the **GSE223077** dataset. Analysis via **edgeR** identified **2,487** significantly differentially expressed genes (FDR < 0.05) in the **WT Air vs. WT Smoke** comparison, highlighting a massive mobilization of detoxification (e.g., ***CYP1B1***) pathways. 
 
-Key visualization through heatmap analysis revealed that **Genotype** was the primary driver of cellular identity, as samples clustered more strongly by **ADGRG6 knockdown** status than by acute smoke exposure. This suggests that loss of the ADGRG6 mechanosensor fundamentally alters the alveolar baseline, potentially exacerbating the cellular damage caused by chronic smoke—the same toxic stressor impacting my father's lung health. These findings provide molecular insight into the "perfect storm" of genetic vulnerability and environmental insult that drives chronic lung pathologies.
+Key visualization through heatmap analysis revealed that **Genotype** was the primary driver of cellular identity, as samples clustered more strongly by **ADGRG6 knockdown** status than by acute smoke exposure. This suggests that loss of the ADGRG6 mechanosensor fundamentally alters the alveolar baseline, potentially exacerbating the cellular damage caused by chronic smoke. These findings provide molecular insight into the "perfect storm" of genetic vulnerability and environmental insult that drives chronic lung pathologies.  
+
+While this initial analysis focused on the wild-type response to smoke, the next phase of this project will involve a formal in-depth comparison of the ADGRG6 Knockdown Air vs. ADGRG6 Knockdown Smoke groups. By comparing the smoke response across genotypes, I aim to determine if the loss of this mechanosensor specifically blunts or hyper-activates certain protective pathways, further clarifying the "genetic risk" observed in the original study.
 
 ---
 
