@@ -1,0 +1,162 @@
+---
+title: "GSE223077: Bulk RNA-seq of CRISPRi ADGRG6-kd iAT2 Following Cigarette Smoke Exposure"
+author: "Jay Du"
+date: "10 Mar 2026"
+output:
+  bookdown::html_document2:
+    code_folding: hide  
+    theme: darkly
+    fig.caption: true
+    toc: true                  
+    toc_depth: 3                
+    toc_float: true
+bibliography: references.bib
+link-citations: true
+nocite: '@*'
+---
+
+<style>
+body {
+  font-size: 16px;
+}
+
+caption {
+  font-size: 14px;
+  font-style: italic;
+}
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  fig.align = "center"
+)
+
+
+# Load library
+library("biomaRt")
+library("ComplexHeatmap")
+library("dplyr")
+library("edgeR")
+library("GEOquery")
+library("ggplot2")
+library("knitr")
+library("RColorBrewer")
+library("rmarkdown")
+library("tidyr")
+library("tibble")
+
+
+# Helper function for plotting modified based on lecture exercise
+plot_box <- function(mat, main = "", xlab = "Sample", ylab = "log2(counts+1)") {
+  df <- as.data.frame(mat)
+  df_long <- df |>
+    mutate(gene = rownames(df)) |>
+    pivot_longer(-gene, names_to = "sample", values_to = "value") |>
+    mutate(value = log2(value + 1))
+  
+  ggplot(df_long, aes(x = sample, y = value)) +
+    geom_boxplot(outlier.size = 0.2) +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+    labs(title = main, x = xlab, y = ylab)
+}
+
+
+plot_density <- function(mat, main = "", xlab = "log2(counts+1)", ylab = "Density") {
+  df <- as.data.frame(mat)
+  df_long <- df |>
+    mutate(gene = rownames(df)) |>
+    pivot_longer(-gene, names_to = "sample", values_to = "value") |>
+    mutate(value = log2(value + 1))
+  
+  ggplot(df_long, aes(x = value, colour = sample)) +
+    geom_density() +
+    theme_bw() +
+    labs(title = main, x = xlab, y = ylab) +
+    guides(colour = "none")
+}
+```
+
+---
+
+# Introduction {#introduction}
+
+
+
+
+---
+
+# Thresholded over-representation analysis {#threshold}
+
+## Data Analysis {#threshold_ana}
+
+
+---
+
+## Result {#threshold_result}
+
+
+---
+
+# Non-thresholded Gene set Enrichment Analysis {#non_threshold}
+
+## Data Analysis {#non_threshold_ana}
+
+---
+
+## Visualization {#non_threshold_vis}
+
+---
+
+## Result Analysis {#non_threshold_result}
+
+
+---
+
+# Conclusions {#conclusion}
+
+
+---
+
+# Questions
+
+## Thresholded over-representation analysis
+
+**Which method did you choose and why?**
+
+**What annotation data did you use and why? What version of the annotation are you using?**
+
+**How many genesets were returned with what thresholds?**
+
+**Run the analysis using the up-regulated set of genes, and the down-regulated set of genes separately. How do these results compare to using the whole list (i.e all differentially expressed genes together vs. the up-regulated and down regulated differentially expressed genes separately)?**
+
+**Do the over-representation results support conclusions or mechanism discussed in the original paper?**
+
+**Can you find evidence, i.e. publications, to support some of the results that you see. How does this evidence support your results.**
+
+---
+
+## Non-thresholded Gene set Enrichment Analysis
+
+**What method did you use? What genesets did you use? Make sure to specify versions and cite your methods.**
+
+**How do these results compare to the results from the thresholded analysis in Assignment #2. Compare qualitatively. Is this a straight forward comparison? Why or why not?**
+
+**How many nodes and how many edges in the resulting map? What thresholds were used to create this map?**
+
+**What parameters did you use to annotate the network?**
+
+**What are the major themes present in this analysis? Do they fit with the model? Are there any novel pathways or themes?**
+
+**Do the enrichment results support conclusions or mechanism discussed in the original paper? How do these results differ from the results you got from Assignment #2 thresholded methods?**
+
+**Can you find evidence, i.e. publications, to support some of the results that you see. How does this evidence support your result?**
+
+---
+
+# References {#references}
+
+Lukas. (n.d.). Close-up photo of lighted cigarette stick [Photograph]. Pexels. https://www.pexels.com/photo/close-up-photo-of-lighted-cigarette-stick-70088/
