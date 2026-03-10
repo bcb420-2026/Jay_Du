@@ -84,14 +84,83 @@ plot_density <- function(mat, main = "", xlab = "log2(counts+1)", ylab = "Densit
 
 # Introduction {#introduction}
 
+Cigarette smoke exposure is one of the major environmental risk factors for chronic respiratory diseases, particularly chronic obstructive pulmonary disease (COPD). Understanding how genetic factors interact with smoke exposure at the molecular level is an important area of respiratory research. One gene of interest is **ADGRG6**, which has been identified through genome-wide association studies (GWAS) as a susceptibility locus for COPD. Studying how perturbation of this gene alters transcriptional programs can provide insight into the biological mechanisms underlying lung injury and disease progression.
 
 
+Following Assignment, further analysis is performed on the RNA-seq dataset **GSE223077**. Specifically, the ranked gene list from the **ADGRG6 knockdown vs. wild-type under air exposure** comparison is used as the primary input for downstream pathway and network analyses to investigate the functional effects of **ADGRG6** perturbation. Two complementary pathway enrichment approaches are applied. First, **thresholded over-representation analysis (ORA)** is used to identify biological pathways enriched among significantly differentially expressed genes. Second, **non-thresholded gene set enrichment analysis (GSEA)** is performed using the entire ranked gene list without applying a significance cutoff. The enrichment results are subsequently visualized and interpreted using the **Cytoscape Enrichment Map pipeline**, which organizes enriched pathways into functional networks and broader biological themes.
+
+
+## Dataset Review {#dataset}
+
+### Dataset Info {#dataset-info}
+
+The dataset used for this assignment **GSE223077** analyzed in this report originates from the study titled *“The COPD GWAS gene ADGRG6 instructs function and injury response in human iPSC-derived type II alveolar epithelial cells.”* The study investigates the functional role of the gene **ADGRG6**, which has been identified in genome-wide association studies (GWAS) as a risk locus for chronic obstructive pulmonary disease (COPD). Using an inducible CRISPR interference (CRISPRi) system in human induced pluripotent stem cell–derived type II alveolar epithelial cells (iAT2s), the authors examined how perturbation of **ADGRG6** affects cellular processes involved in lung injury responses. Their findings suggest that **ADGRG6** influences several key biological pathways including cell adhesion, cytoskeletal organization, proliferation, and responses to cigarette smoke–induced injury, providing insight into gene–environment interactions in COPD pathogenesis.
+
+
+To investigate transcriptional changes associated with these perturbations, RNA sequencing was performed and differential gene expression analysis was conducted to compare experimental conditions. In Assignment 1, the RNA-seq count data were downloaded from GEO and processed in R. The dataset consists of 12 samples representing two experimental factors: **genotype** (wild-type vs. **ADGRG6** knockdown) and **exposure condition** (air vs. cigarette smoke). Each of the four genotype–exposure combinations contains three biological replicates, allowing comparison of transcriptional responses associated with **ADGRG6** perturbation as well as responses to cigarette smoke exposure.
+
+```{r}
+metadata <- data.frame(
+  sample   = c(
+    "WA_WR_0726_1", "WA_WR_0726_2", "WA_WR_0726_3",
+    "WA_WR_0726_4", "WA_WR_0726_5", "WA_WR_0726_6",
+    "WA_WR_0726_7", "WA_WR_0726_8", "WA_WR_0726_9",
+    "WA_WR_0726_10", "WA_WR_0726_11", "WA_WR_0726_12"
+  ),
+  genotype = c(
+    "WT","WT","WT",                     # 1–3
+    "ADGRG6_kd","ADGRG6_kd","ADGRG6_kd", # 4–6
+    "WT","WT","WT",                     # 7–9
+    "ADGRG6_kd","ADGRG6_kd","ADGRG6_kd"  # 10–12
+  ),
+  exposure = c(
+    "Air","Air","Air",                  # 1–3
+    "Air","Air","Air",                  # 4–6
+    "Smoke","Smoke","Smoke",            # 7–9
+    "Smoke","Smoke","Smoke"             # 10–12
+  ),
+  stringsAsFactors = FALSE
+)
+
+knitr::kable(metadata)
+```
+Table 1.1: This table shows the experimental design and sample metadata for the GSE223077 series. Each row represents a unique RNA-seq library, and columns define the specific variables for each sample. 'Genotype' indicates whether the human iAT2 cells were Wild-Type (WT) or subjected to CRISPRi-mediated knockdown of the ADGRG6 mechanosensor (ADGRG6_kd). 'Exposure' identifies the treatment condition: Air (control) or Cigarette Smoke (test). The 'Sample' IDs correspond to the column names in the raw count matrix, where numbers 1–12 represent independent biological replicates.
+
+
+### Dataset Processing {#dataset-process}
+
+Raw gene count data from **GSE223077** were imported into R and analyzed using the **edgeR** RNA-seq differential expression framework. Library sizes varied substantially across samples (approximately 4.3×10⁷ to 8.0×10⁷ reads per library), therefore normalization was required to make expression values comparable across samples. Gene expression values were transformed into **log2 counts per million (log-CPM)** using `edgeR::cpm()`, which normalizes counts relative to sequencing depth and stabilizes variance for downstream analysis. Summary statistics of the log-CPM distribution were used to assess overall expression variability across the dataset.
+
+
+Differential expression analysis was then performed using the **edgeR quasi-likelihood (QL) generalized linear model pipeline**. Gene-wise dispersions, which represent biological variability between replicates, were estimated using `estimateDisp()`. A generalized linear model describing the experimental design was fitted to the normalized count data using `glmQLFit()`.
+
+
+Statistical testing for differential expression was conducted using **quasi-likelihood F-tests** (`glmQLFTest()`), which evaluate predefined contrasts between experimental conditions. Several contrasts were defined, including **wild-type air vs. smoke exposure**, **ADGRG6 knockdown vs. wild-type under air exposure**, and **ADGRG6 knockdown with smoke vs. wild-type air**. For each comparison, genes were ranked based on their differential expression statistics, including log2 fold-change, average log-CPM, and quasi-likelihood F-statistics. P-values were adjusted for multiple testing using the **Benjamini–Hochberg false discovery rate (FDR)** procedure.
+
+
+To avoid retesting and save computational resource, result table was saved at "data/tbl_wt_vs_kd_air.rds". Sample data is shown as follows:
+
+```{r}
+tbl_wt_vs_kd_air <- readRDS("data/tbl_wt_vs_kd_air.rds")
+
+knitr::kable(head(tbl_wt_vs_kd_air, 6))
+```
+Table 1.2: This table showing the top 6 differentially expressed genes for the comparison between Wild-Type (WT) Air vs **ADGRG6** knockdown Air condition, calculated using the edgeR quasi-likelihood F-test pipeline. Each row represents a single gene identified by its HGNC symbol. Columns provide statistical metrics for the ‘WT_vs_**ADGRG6** knockdown’ contrast: ‘logFC’ represents the log2 fold-change, where positive values denote higher expression in **ADGRG6** knockdown cells and negative values indicate down-regulation in **ADGRG6** knockdown cells; ‘logCPM’ indicates the average log2 counts per million across all samples; ‘F’ is the quasi-likelihood F-statistic; ‘PValue’ is the raw probability value; and ‘FDR’ is the False Discovery Rate adjusted for multiple testing using the Benjamini-Hochberg method.
+
+<br>
+
+To view the full data exploration, quality control, and differential expression pipeline, please refer to my previous report: 
+**[Assignment 1: Data Exploration and Differential Expression](https://bcb420-2026.github.io/Jay_Du/A1_JayDu.html)**.
 
 ---
+
 
 # Thresholded over-representation analysis {#threshold}
 
 ## Data Analysis {#threshold_ana}
+
+
+
 
 
 ---
@@ -104,6 +173,34 @@ plot_density <- function(mat, main = "", xlab = "log2(counts+1)", ylab = "Densit
 # Non-thresholded Gene set Enrichment Analysis {#non_threshold}
 
 ## Data Analysis {#non_threshold_ana}
+
+```{r}
+ranked_list <- tbl_wt_vs_kd_air %>%
+  # Calculate rank metric: sign(logFC) * -log10(PValue)
+  mutate(
+    GeneName = hgnc_symbol,
+    rank = sign(logFC) * -log10(PValue)
+  ) %>%
+  # Keep only the two required columns
+  dplyr::select(GeneName, rank) %>%
+  # Handle duplicates just in case (keeps the one with the highest absolute rank)
+  group_by(GeneName) %>%
+  slice_max(order_by = abs(rank), n = 1, with_ties = FALSE) %>%
+  ungroup() %>%
+  # Sort in descending order of rank
+  arrange(desc(rank))
+
+# View the output
+print(ranked_list)
+```
+```{r}
+write.table(ranked_list, 
+            file = "my_ranked_genes.rnk", 
+            sep = "\t",          # GSEA requires tab-separated values
+            row.names = FALSE,   # Prevents R from adding row numbers
+            col.names = FALSE,   # Removes column headers (recommended for GSEA)
+            quote = FALSE)
+```
 
 ---
 
@@ -158,5 +255,3 @@ plot_density <- function(mat, main = "", xlab = "log2(counts+1)", ylab = "Densit
 ---
 
 # References {#references}
-
-Lukas. (n.d.). Close-up photo of lighted cigarette stick [Photograph]. Pexels. https://www.pexels.com/photo/close-up-photo-of-lighted-cigarette-stick-70088/
