@@ -504,16 +504,19 @@ contrast <- makeContrasts(
   "Air_vs_Smoke" = groupWT_Air - groupWT_Smoke,
   "ADGRG6_kd_vs_WT" = groupADGRG6_kd_Air - groupWT_Air,
   "ADGRG6_kd_Smoke_vs_WT_Air" = groupADGRG6_kd_Smoke - groupWT_Air,
+  "ADGRG6_kd_Smoke_vs_WT_Smoke" = groupADGRG6_kd_Smoke - groupWT_Smoke,
   levels = design
 )
 
 qlf_air_vs_smoke <- glmQLFTest(fit, contrast = contrast[, "Air_vs_Smoke"])
 qlf_kd_vs_wt <- glmQLFTest(fit, contrast = contrast[, "ADGRG6_kd_vs_WT"])
 qlf_kd_smoke_vs_wt_air <- glmQLFTest(fit, contrast = contrast[, "ADGRG6_kd_Smoke_vs_WT_Air"])
+qlf_kd_smoke_vs_wt_smoke <- glmQLFTest(fit, contrast = contrast[, "ADGRG6_kd_Smoke_vs_WT_Smoke"])
 
 tab_air_vs_smoke <- topTags(qlf_air_vs_smoke, n = Inf)$table %>% rownames_to_column("hgnc_symbol")
 tab_kd_vs_wt <- topTags(qlf_kd_vs_wt, n = Inf)$table %>% rownames_to_column("hgnc_symbol")
 tab_kd_smoke_vs_wt_air <- topTags(qlf_kd_smoke_vs_wt_air, n = Inf)$table %>% rownames_to_column("hgnc_symbol")
+tab_kd_smoke_vs_wt_smoke <- topTags(qlf_kd_smoke_vs_wt_smoke, n = Inf)$table %>% rownames_to_column("hgnc_symbol")
 
 knitr::kable(head(tab_air_vs_smoke))
 ```

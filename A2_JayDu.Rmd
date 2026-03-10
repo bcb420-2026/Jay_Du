@@ -48,37 +48,6 @@ library("rmarkdown")
 library("tidyr")
 library("tibble")
 library("gprofiler2")
-
-
-# Helper function for plotting modified based on lecture exercise
-plot_box <- function(mat, main = "", xlab = "Sample", ylab = "log2(counts+1)") {
-  df <- as.data.frame(mat)
-  df_long <- df |>
-    mutate(gene = rownames(df)) |>
-    pivot_longer(-gene, names_to = "sample", values_to = "value") |>
-    mutate(value = log2(value + 1))
-  
-  ggplot(df_long, aes(x = sample, y = value)) +
-    geom_boxplot(outlier.size = 0.2) +
-    theme_bw() +
-    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
-    labs(title = main, x = xlab, y = ylab)
-}
-
-
-plot_density <- function(mat, main = "", xlab = "log2(counts+1)", ylab = "Density") {
-  df <- as.data.frame(mat)
-  df_long <- df |>
-    mutate(gene = rownames(df)) |>
-    pivot_longer(-gene, names_to = "sample", values_to = "value") |>
-    mutate(value = log2(value + 1))
-  
-  ggplot(df_long, aes(x = value, colour = sample)) +
-    geom_density() +
-    theme_bw() +
-    labs(title = main, x = xlab, y = ylab) +
-    guides(colour = "none")
-}
 ```
 
 ---
@@ -88,7 +57,7 @@ plot_density <- function(mat, main = "", xlab = "log2(counts+1)", ylab = "Densit
 Cigarette smoke exposure is one of the major environmental risk factors for chronic respiratory diseases, particularly chronic obstructive pulmonary disease (COPD). Understanding how genetic factors interact with smoke exposure at the molecular level is an important area of respiratory research. One gene of interest is **ADGRG6**, which has been identified through genome-wide association studies (GWAS) as a susceptibility locus for COPD. Studying how perturbation of this gene alters transcriptional programs can provide insight into the biological mechanisms underlying lung injury and disease progression.
 
 
-Following Assignment, further analysis is performed on the RNA-seq dataset **GSE223077**. Specifically, the ranked gene list from the **ADGRG6 knockdown vs. wild-type under air exposure** comparison is used as the primary input for downstream pathway and network analyses to investigate the functional effects of **ADGRG6** perturbation. Two complementary pathway enrichment approaches are applied. First, **thresholded over-representation analysis (ORA)** is used to identify biological pathways enriched among significantly differentially expressed genes. Second, **non-thresholded gene set enrichment analysis (GSEA)** is performed using the entire ranked gene list without applying a significance cutoff. The enrichment results are subsequently visualized and interpreted using the **Cytoscape Enrichment Map pipeline**, which organizes enriched pathways into functional networks and broader biological themes.
+Following Assignment, further analysis is performed on the RNA-seq dataset **GSE223077**. Specifically, the ranked gene list from the **ADGRG6 knockdown vs. wild-type under smoke exposure** comparison is used as the primary input for downstream pathway and network analyses to investigate the functional effects of **ADGRG6** perturbation. Two complementary pathway enrichment approaches are applied. First, **thresholded over-representation analysis (ORA)** is used to identify biological pathways enriched among significantly differentially expressed genes. Second, **non-thresholded gene set enrichment analysis (GSEA)** is performed using the entire ranked gene list without applying a significance cutoff. The enrichment results are subsequently visualized and interpreted using the **Cytoscape Enrichment Map pipeline**, which organizes enriched pathways into functional networks and broader biological themes.
 
 
 ## Dataset Review {#dataset}
@@ -136,17 +105,17 @@ Raw gene count data from **GSE223077** were imported into R and analyzed using t
 Differential expression analysis was then performed using the **edgeR quasi-likelihood (QL) generalized linear model pipeline**. Gene-wise dispersions, which represent biological variability between replicates, were estimated using `estimateDisp()`. A generalized linear model describing the experimental design was fitted to the normalized count data using `glmQLFit()`.
 
 
-Statistical testing for differential expression was conducted using **quasi-likelihood F-tests** (`glmQLFTest()`), which evaluate predefined contrasts between experimental conditions. Several contrasts were defined, including **wild-type air vs. smoke exposure**, **ADGRG6 knockdown vs. wild-type under air exposure**, and **ADGRG6 knockdown with smoke vs. wild-type air**. For each comparison, genes were ranked based on their differential expression statistics, including log2 fold-change, average log-CPM, and quasi-likelihood F-statistics. P-values were adjusted for multiple testing using the **Benjamini–Hochberg false discovery rate (FDR)** procedure.
+Statistical testing for differential expression was conducted using **quasi-likelihood F-tests** (`glmQLFTest()`), which evaluate predefined contrasts between experimental conditions. Several contrasts were defined, including **wild-type air vs. smoke exposure**, **ADGRG6 knockdown vs. wild-type under air exposure**, and **ADGRG6 knockdown vs. wild-type under smoke exposure**. For each comparison, genes were ranked based on their differential expression statistics, including log2 fold-change, average log-CPM, and quasi-likelihood F-statistics. P-values were adjusted for multiple testing using the **Benjamini–Hochberg false discovery rate (FDR)** procedure.
 
 
-To avoid retesting and save computational resource, resulting differential expression table was saved at "data/tbl_wt_vs_kd_air.rds". Sample data is shown as follows:
+To avoid retesting and save computational resource, resulting differential expression table was saved at "data/tbl_wt_vs_kd_smoke.rds". Sample data is shown as follows:
 
 ```{r}
-tbl_wt_vs_kd_air <- readRDS("data/tbl_wt_vs_kd_air.rds")
+tbl_wt_vs_kd_smoke <- readRDS("data/tbl_wt_vs_kd_smoke.rds")
 
-knitr::kable(head(tbl_wt_vs_kd_air, 6))
+knitr::kable(head(tbl_wt_vs_kd_smoke, 6))
 ```
-Table 1.2: This table showing the top 6 differentially expressed genes for the comparison between Wild-Type (WT) Air vs **ADGRG6** knockdown Air condition, calculated using the edgeR quasi-likelihood F-test pipeline. Each row represents a single gene identified by its HGNC symbol. Columns provide statistical metrics for the ‘WT_vs_**ADGRG6** knockdown’ contrast: ‘logFC’ represents the log2 fold-change, where positive values denote higher expression in **ADGRG6** knockdown cells and negative values indicate down-regulation in **ADGRG6** knockdown cells; ‘logCPM’ indicates the average log2 counts per million across all samples; ‘F’ is the quasi-likelihood F-statistic; ‘PValue’ is the raw probability value; and ‘FDR’ is the False Discovery Rate adjusted for multiple testing using the Benjamini-Hochberg method.
+Table 1.2: This table showing the top 6 differentially expressed genes for the comparison between Wild-Type (WT) smoke vs **ADGRG6** knockdown smoke condition, calculated using the edgeR quasi-likelihood F-test pipeline. Each row represents a single gene identified by its HGNC symbol. Columns provide statistical metrics for the ‘WT_vs_**ADGRG6** knockdown’ contrast: ‘logFC’ represents the log2 fold-change, where positive values denote higher expression in **ADGRG6** knockdown cells and negative values indicate down-regulation in **ADGRG6** knockdown cells; ‘logCPM’ indicates the average log2 counts per million across all samples; ‘F’ is the quasi-likelihood F-statistic; ‘PValue’ is the raw probability value; and ‘FDR’ is the False Discovery Rate adjusted for multiple testing using the Benjamini-Hochberg method.
 
 <br>
 
@@ -180,15 +149,15 @@ We will started by pull out **HGNC** symbols from the list for g:profiler.
 
 ```{r}
 # Fet all genes' HGNC symbol
-all_genes <- tbl_wt_vs_kd_air %>%
+all_genes <- tbl_wt_vs_kd_smoke %>%
   pull(hgnc_symbol)
 
 # Separate up- and down-regulated genes
-up_genes <- tbl_wt_vs_kd_air %>%
+up_genes <- tbl_wt_vs_kd_smoke %>%
   filter(logFC > 0) %>%
   pull(hgnc_symbol)
 
-down_genes <- tbl_wt_vs_kd_air %>%
+down_genes <- tbl_wt_vs_kd_smoke %>%
   filter(logFC < 0) %>%
   pull(hgnc_symbol)
 ```
@@ -402,20 +371,20 @@ knitr::kable(top_up, caption = "Top enriched pathways for upregulated significan
 **Downregulated Differentially Expressed Genes** 
 
 ```{r}
-knitr::kable(top_up, caption = "Top enriched pathways for downregulated significant genes")
+knitr::kable(top_down, caption = "Top enriched pathways for downregulated significant genes")
 ```
 
 <br>
 
-These ORA results are consistent with key mechanisms discussed in the original study on ADGRG6 function in human iAT2 cells [@werder2023adgrg6]. Across multiple annotation databases, pathways related to ribosome biogenesis, RNA processing, and cell cycle regulation were among the most significantly enriched. These findings matches the original paper's claim that perturbation of ADGRG6 impacts fundamental processes involved in protein synthesis and cell proliferation.
+These ORA results are consistent with key mechanisms discussed in the original study on ADGRG6 function in human iAT2 cells [@werder2023adgrg6]. Across multiple annotation databases, the coordinated suppression of pathways related to cell adhesion, cytoskeletal organization, extracellular matrix interactions, and regulation of cell projections, all of which are consistent with the paper’s observation that ADGRG6 knockdown impairs focal adhesion, actin cytoskeleton organization, and tight junction formation.
 
-For example, “ribonucleoprotein complex biogenesis” and “ribosome biogenesis” were the most significant GO:BP terms enriched among all significant genes. Ribosome biogenesis and proper assembly of ribonucleoprotein complexes are critical for maintaining translational capacity and cellular growth. In the context of alveolar epithelial cells, efficient protein synthesis is necessary for cell renewal and repair after injury. Dysregulation of ribosome biogenesis has been associated with altered proliferative states and impaired epithelial regeneration, consistent with the transcriptional changes observed following ADGRG6 knockdown [@prakash2019ribosome].
+Specifically, Gene Ontology analysis highlighted downregulation of plasma membrane bounded cell projection morphogenesis, neuron projection morphogenesis, and cell projection morphogenesis, indicating impaired formation and maintenance of cellular extensions. Pathways controlling small GTPase-mediated signal transduction and regulation of cell projection organization were also suppressed, reflecting reduced activity of RHO-family GTPases that regulate cytoskeletal dynamics.
 
-Similarly, enrichment of cell cycle–related pathways (e.g., “cell cycle phase transition”, “DNA replication”) indicates altered regulation of proliferation in ADGRG6‑perturbed cells. The original paper reported effects of ADGRG6 perturbation on cell proliferation and epithelial barrier integrity under cigarette smoke exposure. Indeed, recent work has shown that modulation of cell cycle pathways in alveolar type II cells influences their ability to proliferate and regenerate the epithelial barrier following lung injury, and disruptions in these programs contribute to impaired lung repair in disease contexts [@raby2023mechanisms]. These findings support the interpretation that loss of ADGRG6 function may disrupt proliferative signaling, potentially compromising epithelial homeostasis under stress.
+KEGG pathway analysis further supports these trends, showing downregulation for focal adhesion, adherens junction, and regulation of actin cytoskeleton, consistent with the reported decrease in integrins (ITGB1, ITGA2) and tight junction proteins. The axon guidance pathway also appeared, highlighting broader effects on signaling that guide cellular structure.
 
-Protein processing pathways identified in KEGG (“protein processing in endoplasmic reticulum”) and Reactome (“Translation”, “Cap‑dependent translation initiation”) further suggest an impact on protein quality control and translational efficiency. The endoplasmic reticulum plays a central role in folding and processing of nascent proteins, especially under stress. Cigarette smoke induces endoplasmic reticulum stress in airway epithelial cells, and pathways identified here are consistent with a stress response that could be exacerbated by ADGRG6 knockdown [@raby2023mechanisms].
+Reactome analysis identified suppression of RHO, RAC1, and CDC42 GTPase cycles, as well as extracellular matrix organization and non-integrin membrane–ECM interactions, underscoring impaired coordination between the cytoskeleton and extracellular matrix. WikiPathways analysis confirmed downregulation of focal adhesion, ciliopathies, epithelial-to-mesenchymal transition (EMT)–related pathways, and TGF-β signaling, further supporting disruption of adhesion, polarity, and matrix interactions.
 
-In summary, the ORA results not only recapitulate processes highlighted by the original study (cell structure, proliferation, and injury response) but also reveal additional biological themes, such as translation and ER stress pathways, that are supported by the broader literature on airway epithelial responses to cigarette smoke. These enriched pathways provide further evidence that ADGRG6 perturbation influences key biological processes relevant to COPD pathogenesis.
+Together, these findings show that ADGRG6 knockdown diminishes cytoskeletal integrity and cell-cell adhesion in alveolar epithelial cells, aligning closely with the experimental observations in the original study.
 
 ---
 
@@ -425,7 +394,7 @@ In this section, we perform **non-thresholded gene set enrichment analysis (GSEA
 
 ## Data Setup {#gsea-setup}
 
-The analysis was performed using the Gene Set Enrichment Analysis (GSEA) software, which implements a preranked GSEA algorithm. The **ranked gene list** was derived from the differential expression results for **ADGRG6 knockdown vs. wild-type under air exposure**, with ranking calculated as:
+The analysis was performed using the Gene Set Enrichment Analysis (GSEA) software, which implements a preranked GSEA algorithm. The **ranked gene list** was derived from the differential expression results for **ADGRG6 knockdown vs. wild-type under smoke exposure**, with ranking calculated as:
 
 \[
 \text{rank metric} = \text{sign}(\text{logFC}) \times -\log_{10}(\text{PValue})
@@ -435,7 +404,7 @@ This metric prioritizes genes with both strong fold-changes and statistical sign
 
 Below is the code used to generate ranking. Ranking was saved at data/my_ranked_genes.rnk :
 ```{r}
-ranked_list <- tbl_wt_vs_kd_air %>%
+ranked_list <- tbl_wt_vs_kd_smoke %>%
   # Calculate rank metric: sign(logFC) * -log10(PValue)
   mutate(
     GeneName = hgnc_symbol,
@@ -456,33 +425,129 @@ print(ranked_list)
 
 <br>
 
-A **custom GMT file** from Bader's Lab was used for gene sets. File can be found at:   
+A **custom GMT file** with Version September 01 2025 from Bader's Lab was used for annotation gene sets. File can be found at:   
 
 data/Human_GOBP_AllPathways_noPFOCR_no_GO_iea_September_01_2025_symbol.gmt  
 
 This custom gmt removes redundant parent or overlapping terms (noPFOCR) and excludes electronic annotations (no_GO_iea). This ensures that enriched pathways are specific, high-confidence, experimentally validated, and human-relevant, reducing noise and improving interpretability. Together, these filters enhance the robustness and consistency of results over time, so rerunning the analysis produces stable, biologically meaningful pathway enrichments.
 
 
-## Data Analysis {#gsea_ana}
+## Data Analysis {#gsea-ana}
 
+Result for preranked GSEA was saved under data/A2_GSEA.  
 
+Out of the 6155 genesets recognized by GSEA, 3617 gene sets were upregulated and 2538 are downregulated.
 
+<br>
 
+### Top Gene Set {#gsea-top-gene}
 
+**Top 20 Upregulated Gene Set from GSEA Result**
+
+```{r, fig.cap=""}
+knitr::include_graphics("data/A2_GSEA_pos_top20.png")
+```
+
+In the smoke condition, gene sets positively enriched in wild-type cells relative to ADGRG6-knockdown cells were predominantly associated with protein synthesis, translation, and cell-cycle progression. This indicates that wild-type iAT2 cells maintain higher activity of transcriptional and translational programs when exposed to smoke, whereas these processes appear reduced in ADGRG6-deficient cells.
+
+Several hallmark pathways highlight this trend. The strongest enrichment was observed for HALLMARK_E2F_TARGETS and HALLMARK_MYC_TARGETS_V1, which represent transcriptional programs controlling cell-cycle progression and ribosome biogenesis. Similarly, HALLMARK_G2M_CHECKPOINT indicates increased activity of genes involved in mitotic progression and DNA replication.
+
+<br>
+
+**Top 20 Downregulated Gene Set from GSEA Result**
+
+```{r, fig.cap=""}
+knitr::include_graphics("data/A2_GSEA_neg_top20.png")
+
+```
+
+In contrast, gene sets negatively enriched in wild-type cells (therefore relatively higher in ADGRG6 knockdown cells) were primarily associated with cell adhesion, cytoskeletal organization, extracellular matrix interactions, and epithelial structural programs. These results indicate that genes involved in maintaining epithelial architecture and cell-cell connectivity show reduced expression in wild-type cells compared with knockdown under smoke exposure.
+
+Several enriched pathways illustrate this pattern. The Cadherin signaling pathway and multiple Gene Ontology terms related to cell–cell adhesion, cell junction assembly, and cell junction organization were strongly enriched. These pathways regulate formation of adherens junctions and epithelial cell connectivity.
+
+Structural cytoskeletal processes were also prominent, including intermediate filament–based processes, intermediate filament cytoskeleton organization, and actin cytoskeleton organization, indicating alterations in cytoskeletal architecture. Additional pathways involved extracellular matrix organization, collagen degradation, and activation of matrix metalloproteinases, which regulate matrix remodeling and tissue structure.
+
+Other enriched processes included epidermis development, keratinization, and keratinocyte differentiation, which reflect epithelial differentiation programs. Together with enrichment for neuron projection guidance and axonogenesis regulation, these findings suggest broad effects on pathways that control cellular morphology and structural organization.
+
+In conclusion, the negatively enriched pathways highlight alterations in adhesion, cytoskeletal integrity, and extracellular matrix signaling, suggesting that ADGRG6 status influences structural and adhesion-related gene programs during smoke exposure.
+
+---
+
+## GSEA Result Summary {#gsea-summary}
+
+Overall, the enrichment results strongly support the mechanisms reported in the original study. The paper demonstrates that ADGRG6 regulates focal adhesions, cytoskeletal organization, tight junctions, and cell proliferation in iAT2 cells, and that knockdown of ADGRG6 alters these pathways, particularly during cigarette smoke exposure.
+
+The enrichment analysis performed here identified many of the same biological processes. In the downregulated pathways, there was strong enrichment for processes related to cell adhesion, cytoskeletal organization, and extracellular matrix interactions, including focal adhesion, cell junction assembly, cadherin signaling, actin cytoskeleton organization, and extracellular matrix organization. These findings are consistent with the study’s observation that ADGRG6 knockdown reduces expression of integrin genes and disrupts focal adhesion and actin cytoskeleton pathways.
+
+Similarly, the positively enriched gene sets in the smoke condition were dominated by cell-cycle and proliferation pathways, including E2F targets, MYC targets, and G2/M checkpoint signaling. This pattern also agrees with the findings reported in the paper, where gene set enrichment analysis showed that cell-cycle pathways such as MYC and E2F signaling were upregulated following ADGRG6 knockdown, reflecting increased proliferative activity in the cells.
+
+Taken together, these results suggest that the enrichment analysis successfully recapitulates the central biological mechanisms described in the study: ADGRG6 contributes to maintenance of epithelial structure and adhesion, and its loss leads to reduced structural integrity but increased proliferative signaling.
 
 
 ---
 
-## Visualization {#gsea_vis}
+# Enrichment Map Visualization {#cytoscape}
 
----
+The non-thresholded GSEA results were then visualized using the Cytoscape Enrichment Map pipeline. Cytoscape is a versatile open-source software platform for visualizing complex networks and integrating them with attribute data. Its Enrichment Map plugin allows for intuitive visualization of gene set enrichment results as a network of interconnected pathways, making it easier to identify overarching biological themes and relationships that might be overlooked in traditional tabular outputs. This approach enhances the interpretability of GSEA results by providing a global view of functional enrichments and their overlaps.
 
-## Result Analysis {#gsea_result}
 
+## Network Annotation {#cytoscape-annotate}
+
+The GSEA results were directly imported using the EnrichmentMap plugin’s ‘Scan Folder’ function.
+
+The resulting network consisted of **1640 nodes** and **16734 edges**, with nodes representing enriched pathways and edges representing gene overlap between pathways. This network was annotated using the **AutoAnnotate** app with default settings. Clustering was performed using the **Markov Cluster Algorithm (MCL)**, and cluster labels were automatically generated via the **WordCloud algorithm** applied to the GS_DESCR (Gene Set Description) column. 
+
+To improve readability and reduce visual overlap of nodes and edges, the **Layout Cluster** feature in Cytoscape was applied, ensuring that clusters were spatially separated and easier to interpret. Edge filtering at a **similarity coefficient ≥ 0.5** prevented the network from becoming overly dense, while nodes were included only if **FDR < 0.05**.  
+
+This approach summarized the main biological themes within each cluster while maintaining a clean and interpretable visualization.
+
+The network was annotated based on the **GO:BP dataset** as described in the [GSEA setup](#gsea-setup).
+
+
+## Overview {#cytoscape-overview}
+
+The figure below shows the enrichment map prior to manual layout adjustments, with clusters highlighted and labeled according to their primary biological function:
+
+```{r, fig.cap=""}
+knitr::include_graphics("data/A2_raw_layout.png")
+
+```
+
+<br>
+
+After applying the threshold bentioned above as well as some maneul rearrangment, the graph became more clear:
+
+```{r, fig.cap=""}
+knitr::include_graphics("data/A2_cytoscape.png")
+
+```
+
+
+## Network Interpretation {#cytoscape-ana}
+
+The enrichment map reveals several interconnected biological themes based on the clustered pathways. One of the most prominent themes involves **cell cycle regulation and mitotic progression**. Multiple clusters contain pathways related to mitotic checkpoints, positive and negative regulation of mitotic transition, cytokinesis, and APC/C-mediated cell cycle control. Together, these pathways indicate strong enrichment of genes involved in controlling cell division and ensuring accurate chromosome segregation. This theme is consistent with the experimental findings that ADGRG6 knockdown increases proliferation in iAT2 cells, with more cells entering S and G2/M phases.
+
+Another major theme is **DNA replication, repair, and genome maintenance**. Clusters labeled with processes such as recombinational DNA repair, replication maintenance, post-replication repair, and telomere regulation indicate that pathways responsible for maintaining genome stability are highly represented. These processes are closely linked to the cell cycle, as DNA repair mechanisms must coordinate with replication and mitosis to prevent genomic instability during cell proliferation.
+
+A third theme centers on **chromatin organization and epigenetic regulation**. Pathways involving chromatin remodeling, nucleosome complex disassembly, chromatin condensation, and cohesin-mediated chromosome organization appear grouped together in the network. These processes regulate DNA accessibility and chromosome structure, which are essential for proper transcription, replication, and chromosome segregation during cell division.
+
+Finally, smaller clusters indicate processes related to **cellular structure and metabolism**, including integrin interactions, tight junction maintenance, mitochondrial activity, and metabolic pathways such as the TCA cycle and hexose phosphate processes. These pathways may reflect broader cellular adaptations associated with altered proliferation and cellular function following ADGRG6 perturbation.
+
+Overall, the enrichment map indicates that the major biological themes are centered around cell cycle regulation, genome stability, and chromatin organization, with additional contributions from pathways involved in RNA processing and cellular metabolism. These enriched processes collectively point toward mechanisms associated with cell proliferation, DNA maintenance, and structural organization of the cell. Such patterns strongly supported the original paper's experimental observations that ADGRG6 knockdown promotes increased proliferation and influences cytoskeletal organization and cell–cell junction pathways in alveolar epithelial cells.
+
+### Novel pathway - SARS-CoV infection
+
+Some clusters also highlight pathways related to SARS-CoV infection, which may initially appear unexpected but are biologically plausible in this context. Because alveolar type II epithelial (AT2) cells are key target cells for respiratory viruses, enrichment of pathways associated with viral infection likely reflects broader host cellular responses involved in epithelial defense, stress responses, and regulation of transcription and translation during infection. Many viral infection pathways share genes involved in RNA processing, protein synthesis, and immune or stress signaling, which can overlap with pathways regulating epithelial cell function. Therefore, the presence of SARS-CoV infection–related pathways in the network is reasonable and may reflect shared molecular mechanisms between viral response pathways and the cellular processes affected by ADGRG6 knockdown in respiratory epithelial cells.
 
 ---
 
 # Conclusions {#conclusion}
+
+The pathway enrichment analyses, both ORA and GSEA, provide a striking view of the transcriptional consequences of ADGRG6 knockdown in iAT2 cells under cigarette smoke exposure. The ORA results immediately draw attention to suppression of pathways central to cell adhesion, cytoskeletal organization, and extracellular matrix interactions, reinforcing the idea that ADGRG6 plays a key role in maintaining epithelial structure. Conversely, GSEA revealed that cell-cycle and proliferation pathways are relatively more active in ADGRG6-deficient cells, suggesting a compensatory or deregulated proliferative response when structural integrity is compromised.
+
+The Cytoscape enrichment map brings these insights to life, allowing us to see how interconnected these biological processes truly are. The network makes it clear that themes like cell cycle control, genome maintenance, and chromatin organization dominate the transcriptional landscape, while smaller but meaningful clusters point to metabolism, RNA processing, and even pathways related to viral infection. The inclusion of SARS-CoV–related pathways may at first seem tangential, but upon reflection, it underscores how AT2 cells share core regulatory circuits for stress, translation, and immune responses that are engaged both during viral infection and in response to structural perturbation.
+
+Subjectively, what stands out is the cohesive story the data tell: ADGRG6 knockdown shifts the balance from structural maintenance toward proliferative and cell-cycle activity, while simultaneously affecting broader cellular programs that intersect with immune and stress responses. The integration of ORA, GSEA, and network visualization not only confirms previously reported findings but also reveals subtle, potentially overlooked themes, emphasizing the power of combining thresholded, non-thresholded, and network-level approaches to fully interpret complex RNA-seq datasets.
 
 
 ---
@@ -494,6 +559,9 @@ This custom gmt removes redundant parent or overlapping terms (noPFOCR) and excl
 **Which method did you choose and why?**
 
 [Method](#ora-method)  
+
+
+<br>
 
 **What annotation data did you use and why? What version of the annotation are you using?**  
 
@@ -511,16 +579,25 @@ knitr::kable(annotation_versions_df, caption = "Annotation Dataset Versions")
 ```
 
 
+
+<br>
+
 **How many genesets were returned with what thresholds?**  
 
 [Counts](#ora-count)  
 
+
+
+<br>
 
 **Run the analysis using the up-regulated set of genes, and the down-regulated set of genes separately. How do these results compare to using the whole list (i.e all differentially expressed genes together vs. the up-regulated and down regulated differentially expressed genes separately)?**  
 
 When ORA was performed using the combined list of all significant genes, a greater number of enriched pathways was detected compared to analyses using up-regulated and down-regulated genes separately. For example, for Reactome, 473 pathways were enriched using all significant genes, compared with 345 for down-regulated genes and 43 for up-regulated genes (473 > 345 + 43).  
 
 The higher number of pathways identified in the combined analysis reflects the larger and more diverse gene set, which increases the probability that pathways containing both up- and down-regulated genes reach statistical significance. In contrast, analyzing genes separately highlights direction-specific enrichment, identifying pathways primarily associated with either transcriptional activation or repression. Consequently, the combined analysis provides a broader overview of affected biological processes, whereas separate analyses allow clearer interpretation of directional transcriptional responses associated with ADGRG6 perturbation.
+
+
+<br>
 
 **Do the over-representation results support conclusions or mechanism discussed in the original paper? Can you find evidence, i.e. publications, to support some of the results that you see. How does this evidence support your results.**
 
@@ -534,19 +611,61 @@ The higher number of pathways identified in the combined analysis reflects the l
 
 [Setup](#gsea-setup)  
 
+<br>
+
 **How do these results compare to the results from the thresholded analysis in Assignment #2. Compare qualitatively. Is this a straight forward comparison? Why or why not?**
 
+[Comparison](#gsea-summary)
 
+
+<br>
 
 **How many nodes and how many edges in the resulting map? What thresholds were used to create this map?**
 
+**1640 nodes** and **16734 edges**. I used **fdr < 0.05** for nodes and **similarity coefficient ≥ 0.5** for edges cut off for a cleaner and more interpretable visualization.
+
+
+<br>
+
 **What parameters did you use to annotate the network?**
+
+The network was annotated using the AutoAnnotate app in Cytoscape and GO:BP annotation dataset as mentioned in [GSEA](#gsea-setup). To prevent the network from becoming an unreadable 'hairball,' an edge cutoff threshold of 0.5 similarity coefficient was applied. The network was clustered using the MCL (Markov Cluster Algorithm). Cluster labels were generated using the WordCloud algorithm, which analyzes the GS_DESCR (Gene Set Description) column to summarize the central biological functions of each grouped cluster.
+
+Scale font by cluster size was uncheck so that smaller node can wtill be visible. Font size was set to 20.
+
+Lay out cluster to minimize overlap was use to get a good start for maneul rearrangement.
+
+
+<br>
 
 **What are the major themes present in this analysis? Do they fit with the model? Are there any novel pathways or themes?**
 
+[Theme](#cytoscape-ana)
+
+
+<br>
+
 **Do the enrichment results support conclusions or mechanism discussed in the original paper? How do these results differ from the results you got from Assignment #2 thresholded methods?**
 
+1. [Yes](#gsea-summary)
+
+2. In theory, non-thresholded Gene Set Enrichment Analysis (GSEA) can detect pathway-level changes that thresholded methods such as Over-Representation Analysis (ORA) may miss. However, in this specific analysis the overall biological conclusions from both approaches were largely consistent.
+
+Both the thresholded ORA results from Assignment #2 and the non-thresholded GSEA results identified enrichment of pathways related to cell cycle regulation, protein synthesis, and RNA processing, as well as pathways associated with cell adhesion, cytoskeletal organization, and extracellular matrix interactions. For example, ORA identified enrichment of processes such as cell cycle phase transition, ribosome biogenesis, and mRNA processing, while the GSEA results highlighted similar biological programs through gene sets such as E2F targets, MYC targets, G2/M checkpoint, and translation-related pathways. Likewise, both analyses detected pathways related to focal adhesion, actin cytoskeleton organization, and cell junction assembly, which are consistent with the mechanisms described in the original study.
+
+Because the differential expression signal in this dataset appears relatively strong, many genes involved in these pathways passed the significance thresholds used in ORA. As a result, the thresholded method was still able to capture the same major biological themes that were detected by GSEA. The primary difference is therefore not in the biological interpretation, but in the strength and structure of the enrichment signals: GSEA highlights coordinated shifts across the entire ranked gene list and often shows stronger pathway-level enrichment, while ORA focuses only on genes that exceed predefined significance thresholds.
+
+Overall, in this case the non-thresholded GSEA analysis did not reveal entirely new biological mechanisms compared with the thresholded ORA results, but it provided additional support and clearer pathway-level evidence for the same processes affected by ADGRG6 knockdown.
+
+<br>
+
 **Can you find evidence, i.e. publications, to support some of the results that you see. How does this evidence support your result?**
+
+Evidence from previous studies supports several of the biological processes identified in the enrichment analysis. One major group of enriched pathways in this analysis involved ribosome biogenesis, RNA processing, and translation-related pathways. A study by Prakash et al. (2019)[@prakash2019ribosome] demonstrated that ribosome biogenesis is closely linked to cellular growth programs and can drive major cellular state transitions such as epithelial–mesenchymal transition (EMT). The authors showed that increased ribosome biogenesis and rRNA synthesis support transcriptional programs that promote cellular plasticity and migration during EMT [@prakash2019ribosome].
+This supports the enrichment results observed here, where pathways such as ribosome biogenesis, translation, and protein synthesis were strongly enriched. These findings suggest increased biosynthetic and transcriptional activity in the affected cells, consistent with known roles of ribosome biogenesis in regulating cell growth and cellular state changes.
+
+Another group of enriched pathways involved cell adhesion, cytoskeletal organization, extracellular matrix interactions, and epithelial structural pathways. These findings are supported by the review by Raby et al. (2023)[@raby2023mechanisms], which describes how airway epithelial integrity depends on proper regulation of junctional complexes, cytoskeletal organization, and epithelial barrier maintenance. The review highlights that environmental stressors such as pollutants or cigarette smoke can disrupt epithelial junctions, impair barrier function, and promote abnormal repair processes in airway diseases such as asthma and COPD [@raby2023mechanisms].
+These mechanisms align with the enrichment results in this analysis, where pathways related to cell junction assembly, cadherin signaling, actin cytoskeleton organization, and extracellular matrix organization were significantly enriched. Together, these studies provide biological evidence that the pathways identified in the enrichment analysis are consistent with known mechanisms regulating epithelial structure, repair, and cellular remodeling.
 
 ---
 

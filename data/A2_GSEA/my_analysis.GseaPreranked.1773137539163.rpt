@@ -1,0 +1,23 @@
+producer_class	xtools.gsea.GseaPreranked
+producer_timestamp	1773137539163
+param	rpt_label	my_analysis
+param	rnd_seed	timestamp
+param	set_min	15
+param	zip_report	false
+param	create_svgs	false
+param	scoring_scheme	weighted
+param	rnk	D:\BCB420\Jay_Du\data\my_ranked_genes.rnk
+param	norm	meandiv
+param	out	C:\Users\Jay\gsea_home\output\mar10
+param	mode	Abs_max_of_probes
+param	include_only_symbols	true
+param	help	false
+param	set_max	500
+param	gmx	C:\Users\Jay\Downloads\Human_GOBP_AllPathways_noPFOCR_no_GO_iea_September_01_2025_symbol.gmt
+param	make_sets	true
+param	plot_top_x	20
+param	gui	false
+param	nperm	1000
+param	collapse	No_Collapse
+
+file	C:\Users\Jay\gsea_home\output\mar10\my_analysis.GseaPreranked.1773137539163\index.html
