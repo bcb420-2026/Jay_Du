@@ -147,7 +147,7 @@ The analysis used the following curated annotation sources:
 - **WikiPathways (WP) [@martens2021wikipathways]:** Community-curated pathways capturing emerging or specialized biological processes.
 
 
-## Data Analysis {ora-ana}
+## Data Analysis {#ora-ana}
 
 We first extracted the HGNC gene symbols from the gene list in order to prepare the data for functional enrichment analysis using g:Profiler. To enable a more detailed comparison of functional patterns, the genes were divided into three separate lists:
 
