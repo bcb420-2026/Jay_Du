@@ -558,19 +558,26 @@ After applying the filters mentioned above and performing some manual rearrangem
 knitr::include_graphics("data/A2_cytoscape.png")
 ```
 
+<br>
+
+To simplify the representation and focus on the most robust biological signals, the network was collapsed into a summary network. A stringent filtering threshold of $FDR < 0.005$ was applied to the enrichment results prior to visualization; this step was necessary to reduce node density and prevent the visual "mess" associated with overlapping, redundant gene sets, ensuring that only the most statistically significant thematic hubs remained.
+
+```{r, fig.cap="Collapsed Summary Network of Enriched Pathways. The network illustrates major biological modules filtered at $FDR < 0.005$ to prioritize high-confidence functional themes. Nodes are colored based on the sign of the Normalized Enrichment Score (NES), with orange representing positive enrichment (upregulation) and blue representing negative enrichment (downregulation). Edges connect related pathways, highlighting the coordinated regulation of cell cycle, DNA maintenance, and metabolic machinery"}
+
+knitr::include_graphics("data/A2_summary_network.png")
+```
+
 ---
 
 ## Network Interpretation {#cytoscape-ana}
 
-The enrichment map reveals several interconnected biological themes based on the clustered pathways. One of the most prominent themes involves **cell cycle regulation and mitotic progression**. Multiple clusters contain pathways related to mitotic checkpoints, positive and negative regulation of mitotic transition, cytokinesis, and APC/C-mediated cell cycle control. Together, these pathways indicate strong enrichment of genes involved in controlling cell division and ensuring accurate chromosome segregation. This theme is consistent with the experimental findings that ADGRG6 knockdown increases proliferation in iAT2 cells, with more cells entering S and G2/M phases.
+One of the most prominent themes in the enrichment map is cell cycle regulation and mitotic progression (at center low region on summary network). This is visualized through a dense, interconnected hub of pathways including the spindle cycle, chromosome alignment and condensation, and sister chromatid cohesion. The presence of "antigen degradation APC" suggests the involvement of the Anaphase-Promoting Complex, which is critical for the timed degradation of regulatory proteins during mitosis. This theme is highly consistent with our model, reflecting the experimental findings that ADGRG6 knockdown increases proliferation and shifts cells into the S and G2/M phases [@werder2023adgrg6].
 
-Another major theme is **DNA replication, repair, and genome maintenance**. Clusters labeled with processes such as recombinational DNA repair, replication maintenance, post-replication repair, and telomere regulation indicate that pathways responsible for maintaining genome stability are highly represented. These processes are closely linked to the cell cycle, as DNA repair mechanisms must coordinate with replication and mitosis to prevent genomic instability during cell proliferation.
+Closely associated with the cell cycle hub is a second major theme of DNA replication, repair, and genomic maintenance. Clusters labeled with recombinational repair, DNA-templated replication, and telomere lengthening indicate a coordinated effort to maintain genome stability. Because one major discovery from this paper involves increased proliferation, these pathways likely represent the necessary cellular infrastructure required to manage the high metabolic cost of rapid DNA synthesis and to prevent the accumulation of damage during frequent divisions.
 
-A third theme centers on **chromatin organization and epigenetic regulation**. Pathways involving chromatin remodeling, nucleosome complex disassembly, chromatin condensation, and cohesin-mediated chromosome organization appear grouped together in the network. These processes regulate DNA accessibility and chromosome structure, which are essential for proper transcription, replication, and chromosome segregation during cell division.
+A third theme centers on chromatin organization and epigenetic regulation. The network reveals clusters involving nucleosome deposition, chromatin remodeling, and CENP-A nucleosome assembly. These processes are essential for the physical reorganization of the genome, ensuring that DNA is properly packaged for segregation and accessible for the transcription of pro-proliferative genes. This structural theme acts as a bridge, providing the physical framework for the genetic and mitotic activities observed in the first two themes.
 
-Finally, smaller clusters indicate processes related to **cellular structure and metabolism**, including integrin interactions, tight junction maintenance, mitochondrial activity, and metabolic pathways such as the TCA cycle and hexose phosphate processes. These pathways may reflect broader cellular adaptations associated with altered proliferation and cellular function following ADGRG6 perturbation.
-
-Overall, the enrichment map indicates that the major biological themes are centered around cell cycle regulation, genome stability, and chromatin organization, with additional contributions from pathways involved in RNA processing and cellular metabolism. These enriched processes collectively point toward mechanisms associated with cell proliferation, DNA maintenance, and structural organization of the cell. Such patterns strongly supported the original paper's experimental observations that ADGRG6 knockdown promotes increased proliferation and influences cytoskeletal organization and cell–cell junction pathways in alveolar epithelial cells [@werder2023adgrg6].
+Finally, the analysis reveals a significant theme involving metabolic bioenergetics and protein translation. The separate "island" on the right of the map highlights mitochondrial biogenesis, the respiratory chain (NADH), and purine processing, while the top-left clusters focus on protein translation synthesis and tRNA aminoacylation. Interestingly, a novel or distinct signature in this data is the negative enrichment (blue nodes) of plasma adhesion molecules and integrin surface matrix. This matches the paper'd conclusion that as the cells commit to the metabolic and replicative demands of the ADGRG6 knockdown phenotype, they undergo a structural shift, potentially weakening cell-cell junctions and adhesion to prioritize division over niche stability [@werder2023adgrg6].
 
 <br>
 
