@@ -1722,7 +1722,7 @@ knitr::kable(metadata)</code></pre>
 <p>Raw gene count data from <strong>GSE223077</strong> were imported into R and analyzed using the <strong>edgeR</strong> RNA-seq differential expression framework. Library sizes varied substantially across samples (approximately 4.3×10⁷ to 8.0×10⁷ reads per library), therefore normalization was required to make expression values comparable across samples. Gene expression values were transformed into <strong>log2 counts per million (log-CPM)</strong> using <code>edgeR::cpm()</code>, which normalizes counts relative to sequencing depth and stabilizes variance for downstream analysis. Summary statistics of the log-CPM distribution were used to assess overall expression variability across the dataset.</p>
 <p>Differential expression analysis was then performed using the <strong>edgeR quasi-likelihood (QL) generalized linear model pipeline</strong>. Gene-wise dispersions, which represent biological variability between replicates, were estimated using <code>estimateDisp()</code>. A generalized linear model describing the experimental design was fitted to the normalized count data using <code>glmQLFit()</code>.</p>
 <p>Statistical testing for differential expression was conducted using <strong>quasi-likelihood F-tests</strong> (<code>glmQLFTest()</code>), which evaluate predefined contrasts between experimental conditions. Several contrasts were defined, including <strong>wild-type air vs. smoke exposure</strong>, <strong>ADGRG6 knockdown vs. wild-type under air exposure</strong>, and <strong>ADGRG6 knockdown with smoke vs. wild-type air</strong>. For each comparison, genes were ranked based on their differential expression statistics, including log2 fold-change, average log-CPM, and quasi-likelihood F-statistics. P-values were adjusted for multiple testing using the <strong>Benjamini–Hochberg false discovery rate (FDR)</strong> procedure.</p>
-<p>To avoid retesting and save computational resource, result table was saved at “data/tbl_wt_vs_kd_air.rds” and shown as follows:</p>
+<p>To avoid retesting and save computational resource, resulting differential expression table was saved at “data/tbl_wt_vs_kd_air.rds”. Sample data is shown as follows:</p>
 <pre class="r"><code>tbl_wt_vs_kd_air &lt;- readRDS(&quot;data/tbl_wt_vs_kd_air.rds&quot;)
 
 knitr::kable(head(tbl_wt_vs_kd_air, 6))</code></pre>
@@ -1796,10 +1796,985 @@ knitr::kable(head(tbl_wt_vs_kd_air, 6))</code></pre>
 </div>
 </div>
 </div>
-<div id="threshold" class="section level1" number="2">
-<h1><span class="header-section-number">2</span> Thresholded over-representation analysis</h1>
-<div id="threshold_ana" class="section level2" number="2.1">
-<h2><span class="header-section-number">2.1</span> Data Analysis</h2>
+<div id="ora" class="section level1" number="2">
+<h1><span class="header-section-number">2</span> Thresholded Over-Representation Analysis (ORA)</h1>
+<p>In this section, we perform thresholded over-representation analysis (ORA) to identify biological pathways enriched among significantly differentially expressed genes. ORA evaluates whether predefined gene sets occur more frequently in a list of significant genes than expected by chance.</p>
+<div id="ora-method" class="section level2" number="2.1">
+<h2><span class="header-section-number">2.1</span> Method selection</h2>
+<p>The ORA was conducted using the <strong>g:Profiler</strong> tool (via the <code>gprofiler2</code> R package). This method was chosen because it is well-established for pathway enrichment analysis, integrates multiple annotation databases, and applies multiple testing correction (Benjamini–Hochberg FDR) to control for false positives. Additionally, g:Profiler provides outputs directly compatible with Cytoscape for downstream network visualization.</p>
+</div>
+<div id="ora-annotate" class="section level2" number="2.2">
+<h2><span class="header-section-number">2.2</span> Annotation data</h2>
+<p>The analysis used the following curated annotation sources:</p>
+<ul>
+<li><strong>GO Biological Process (<a href="GO:BP" class="uri">GO:BP</a>):</strong> Captures biological pathways and cellular processes relevant to gene function. Selected because the study focuses on cellular responses such as adhesion, cytoskeletal organization, proliferation, and injury response.<br />
+</li>
+<li><strong>KEGG:</strong> Includes well-established signaling and metabolic pathways.<br />
+</li>
+<li><strong>Reactome (REAC):</strong> Provides detailed mechanistic pathways for signaling and metabolic processes.<br />
+</li>
+<li><strong>WikiPathways (WP):</strong> Community-curated pathways capturing emerging or specialized biological processes.</li>
+</ul>
+</div>
+<div id="data-analysis-ora-ana" class="section level2" number="2.3">
+<h2><span class="header-section-number">2.3</span> Data Analysis {ora-ana}</h2>
+<p>We will started by pull out <strong>HGNC</strong> symbols from the list for g:profiler.</p>
+<pre class="r"><code># Fet all genes&#39; HGNC symbol
+all_genes &lt;- tbl_wt_vs_kd_air %&gt;%
+  pull(hgnc_symbol)
+
+# Separate up- and down-regulated genes
+up_genes &lt;- tbl_wt_vs_kd_air %&gt;%
+  filter(logFC &gt; 0) %&gt;%
+  pull(hgnc_symbol)
+
+down_genes &lt;- tbl_wt_vs_kd_air %&gt;%
+  filter(logFC &lt; 0) %&gt;%
+  pull(hgnc_symbol)</code></pre>
+<p>Top 10 expressed genes from the whole list</p>
+<pre class="r"><code>knitr::kable(
+  data.frame(HGNC_Symbol = head(all_genes, 10))
+)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">HGNC_Symbol</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">NPPC</td>
+</tr>
+<tr class="even">
+<td align="left">PPP1R12C</td>
+</tr>
+<tr class="odd">
+<td align="left">SPON2</td>
+</tr>
+<tr class="even">
+<td align="left">FN1</td>
+</tr>
+<tr class="odd">
+<td align="left">RDH13</td>
+</tr>
+<tr class="even">
+<td align="left">FBN2</td>
+</tr>
+<tr class="odd">
+<td align="left">TARID</td>
+</tr>
+<tr class="even">
+<td align="left">PALD1</td>
+</tr>
+<tr class="odd">
+<td align="left">COL11A1</td>
+</tr>
+<tr class="even">
+<td align="left">EPS8L1</td>
+</tr>
+</tbody>
+</table>
+<p>Top 5 genes expressed from the upregulated list</p>
+<pre class="r"><code>knitr::kable(
+  data.frame(HGNC_Symbol = head(up_genes, 5))
+)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">HGNC_Symbol</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">SPON2</td>
+</tr>
+<tr class="even">
+<td align="left">FN1</td>
+</tr>
+<tr class="odd">
+<td align="left">FBN2</td>
+</tr>
+<tr class="even">
+<td align="left">TARID</td>
+</tr>
+<tr class="odd">
+<td align="left">PALD1</td>
+</tr>
+</tbody>
+</table>
+<p>Top 5 genes expressed from the downregulated list</p>
+<pre class="r"><code>knitr::kable(
+  data.frame(HGNC_Symbol = head(down_genes, 5))
+)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">HGNC_Symbol</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">NPPC</td>
+</tr>
+<tr class="even">
+<td align="left">PPP1R12C</td>
+</tr>
+<tr class="odd">
+<td align="left">RDH13</td>
+</tr>
+<tr class="even">
+<td align="left">EPS8L1</td>
+</tr>
+<tr class="odd">
+<td align="left">SDC4</td>
+</tr>
+</tbody>
+</table>
+<p><br></p>
+<p>Now we perform ORA using <strong>gprofiler2</strong> for three gene sets: all differentially expressed genes, up-regulated genes, and down-regulated genes. As discussed previously (#ora-annotate), the analysis focuses on <strong>GO Biological Process (<a href="GO:BP" class="uri">GO:BP</a>), KEGG, Reactome, and WikiPathways</strong> annotations, as these databases capture pathway-level biological processes relevant to the functional effects of <strong>ADGRG6</strong> perturbation.</p>
+<p>Prior to enrichment analysis, genes were filtered using a significance threshold of <strong>FDR &lt; 0.05</strong>. This threshold controls the false discovery rate after multiple testing correction and helps reduce background noise and false positives, ensuring that enrichment results reflect genuine biological responses rather than random variation.</p>
+<p>Additionally, <strong>electronic GO annotations (IEA)</strong> were excluded. IEA annotations are automatically inferred computationally rather than manually curated, and may include less reliable or overly broad gene-function associations. By excluding these annotations, the enrichment analysis focuses on <strong>experimentally supported and curated pathways</strong>, improving the reliability and interpretability of the results.</p>
+<p>Lastly, gene sets were filtered to include pathways containing 5–500 genes to improve the reliability of the ORA results. Very small gene sets can appear significant due to a few overlapping genes, while very large sets are often broad and less informative. Restricting pathway size focuses the analysis on well-defined biological processes with sufficient gene representation for robust enrichment.</p>
+<pre class="r"><code># Run enrichment for all genes
+gost_all &lt;- gost(
+  query = all_genes,
+  organism = &quot;hsapiens&quot;,
+  sources = c(&quot;GO:BP&quot;,&quot;KEGG&quot;,&quot;REAC&quot;,&quot;WP&quot;),
+  user_threshold = 0.05,
+  correction_method = &quot;fdr&quot;,
+  exclude_iea = TRUE,
+  significant = TRUE,
+)
+
+# Filter gene set size to 5-500
+gost_all$result &lt;- gost_all$result %&gt;%
+  filter(term_size &gt; 5 &amp; term_size &lt; 500)
+
+# Run enrichment for up-regulated genes
+gost_up &lt;- gost(
+  query = up_genes,
+  organism = &quot;hsapiens&quot;,
+  sources = c(&quot;GO:BP&quot;,&quot;KEGG&quot;,&quot;REAC&quot;,&quot;WP&quot;),
+  user_threshold = 0.05,
+  correction_method = &quot;fdr&quot;,
+  exclude_iea = TRUE,
+  significant = TRUE,
+)
+
+# Filter gene set size to 5-500
+gost_up$result &lt;- gost_up$result %&gt;%
+  filter(term_size &gt; 5 &amp; term_size &lt; 500)
+
+# Run enrichment for down-regulated genes
+gost_down &lt;- gost(
+  query = down_genes,
+  organism = &quot;hsapiens&quot;,
+  sources = c(&quot;GO:BP&quot;,&quot;KEGG&quot;,&quot;REAC&quot;,&quot;WP&quot;),
+  user_threshold = 0.05,
+  correction_method = &quot;fdr&quot;,
+  exclude_iea = TRUE,
+  significant = TRUE,
+)
+
+# Filter gene set size to 5-500
+gost_down$result &lt;- gost_down$result %&gt;%
+  filter(term_size &gt; 5 &amp; term_size &lt; 500)</code></pre>
+<hr />
+</div>
+<div id="ora-result" class="section level2" number="2.4">
+<h2><span class="header-section-number">2.4</span> Result</h2>
+<div id="ora-count" class="section level3" number="2.4.1">
+<h3><span class="header-section-number">2.4.1</span> Gene set count</h3>
+<p>Let’s first have a look at the number of significant gene sets for each annotation data:</p>
+<p><br></p>
+<p><strong><a href="GO:BP" class="uri">GO:BP</a></strong></p>
+<pre class="r"><code># Extract and print the number of significant genesets returned for GO:BP
+cat(&quot;Significant GO:BP pathways for All Significant genes:&quot;, 
+    nrow(gost_all$result[gost_all$result$source == &quot;GO:BP&quot;, ]), &quot;\n&quot;)</code></pre>
+<pre><code>## Significant GO:BP pathways for All Significant genes: 686</code></pre>
+<pre class="r"><code>cat(&quot;Significant GO:BP pathways for Down-regulated genes:&quot;, 
+    nrow(gost_up$result[gost_up$result$source == &quot;GO:BP&quot;, ]), &quot;\n&quot;)</code></pre>
+<pre><code>## Significant GO:BP pathways for Down-regulated genes: 211</code></pre>
+<pre class="r"><code>cat(&quot;Significant GO:BP pathways for Up-regulated genes:&quot;, 
+    nrow(gost_down$result[gost_down$result$source == &quot;GO:BP&quot;, ]), &quot;\n&quot;)</code></pre>
+<pre><code>## Significant GO:BP pathways for Up-regulated genes: 469</code></pre>
+<p><br></p>
+<p><strong>Reactome</strong></p>
+<pre class="r"><code># Extract and print the number of significant genesets returned for REAC
+cat(&quot;Significant Reactome pathways for All Significant genes:&quot;, 
+    nrow(gost_all$result[gost_all$result$source == &quot;REAC&quot;, ]), &quot;\n&quot;)</code></pre>
+<pre><code>## Significant Reactome pathways for All Significant genes: 473</code></pre>
+<pre class="r"><code>cat(&quot;Significant Reactome pathways for Down-regulated genes:&quot;, 
+    nrow(gost_up$result[gost_up$result$source == &quot;REAC&quot;, ]), &quot;\n&quot;)</code></pre>
+<pre><code>## Significant Reactome pathways for Down-regulated genes: 43</code></pre>
+<pre class="r"><code>cat(&quot;Significant Reactome pathways for Up-regulated genes:&quot;, 
+    nrow(gost_down$result[gost_down$result$source == &quot;REAC&quot;, ]), &quot;\n&quot;)</code></pre>
+<pre><code>## Significant Reactome pathways for Up-regulated genes: 345</code></pre>
+<p><br></p>
+<p><strong>KEGG</strong></p>
+<pre class="r"><code># Extract and print the number of significant genesets returned for KEGG
+cat(&quot;Significant KEGG pathways for All Significant genes:&quot;, 
+    nrow(gost_all$result[gost_all$result$source == &quot;KEGG&quot;, ]), &quot;\n&quot;)</code></pre>
+<pre><code>## Significant KEGG pathways for All Significant genes: 147</code></pre>
+<pre class="r"><code>cat(&quot;Significant KEGG pathways for Down-regulated genes:&quot;, 
+    nrow(gost_up$result[gost_up$result$source == &quot;KEGG&quot;, ]), &quot;\n&quot;)</code></pre>
+<pre><code>## Significant KEGG pathways for Down-regulated genes: 54</code></pre>
+<pre class="r"><code>cat(&quot;Significant KEGG pathways for Up-regulated genes:&quot;, 
+    nrow(gost_down$result[gost_down$result$source == &quot;KEGG&quot;, ]), &quot;\n&quot;)</code></pre>
+<pre><code>## Significant KEGG pathways for Up-regulated genes: 55</code></pre>
+<p><br></p>
+<p><strong>WikiPathways</strong></p>
+<pre class="r"><code># Extract and print the number of significant genesets returned for WP
+cat(&quot;Significant WikiPathways for All Significant genes:&quot;, 
+    nrow(gost_all$result[gost_all$result$source == &quot;WP&quot;, ]), &quot;\n&quot;)</code></pre>
+<pre><code>## Significant WikiPathways for All Significant genes: 128</code></pre>
+<pre class="r"><code>cat(&quot;Significant WikiPathways for Down-regulated genes:&quot;, 
+    nrow(gost_up$result[gost_up$result$source == &quot;WP&quot;, ]), &quot;\n&quot;)</code></pre>
+<pre><code>## Significant WikiPathways for Down-regulated genes: 12</code></pre>
+<pre class="r"><code>cat(&quot;Significant WikiPathways for Up-regulated genes:&quot;, 
+    nrow(gost_down$result[gost_down$result$source == &quot;WP&quot;, ]), &quot;\n&quot;)</code></pre>
+<pre><code>## Significant WikiPathways for Up-regulated genes: 53</code></pre>
+<p>When ORA was performed using the combined list of all significant genes, a greater number of enriched pathways was detected compared to analyses using up-regulated and down-regulated genes separately. For example, for Reactome, 473 pathways were enriched using all significant genes, compared with 345 for down-regulated genes and 43 for up-regulated genes (473 &gt; 345 + 43).</p>
+<p>The higher number of pathways identified in the combined analysis reflects the larger and more diverse gene set, which increases the probability that pathways containing both up- and down-regulated genes reach statistical significance. In contrast, analyzing genes separately highlights direction-specific enrichment, identifying pathways primarily associated with either transcriptional activation or repression. Consequently, the combined analysis provides a broader overview of affected biological processes, whereas separate analyses allow clearer interpretation of directional transcriptional responses associated with ADGRG6 perturbation.</p>
+<p><br></p>
+</div>
+<div id="ora-discuss" class="section level3" number="2.4.2">
+<h3><span class="header-section-number">2.4.2</span> ORA Result Discussion</h3>
+<p>Below are the top pathways with each three gene sets: all differentially expressed genes, up-regulated genes, and down-regulated genes</p>
+<pre class="r"><code># Function to format gost tables
+format_gost &lt;- function(gost_obj) {
+  gost_obj$result %&gt;%
+    arrange(p_value) %&gt;%                 # sort by p-value
+    group_by(source) %&gt;%                 # group by database
+    slice_head(n = 5) %&gt;%                # top 5 per source
+    ungroup() %&gt;%
+    select(
+      term_name,
+      source,
+      p_value,
+      term_size,
+      query_size,
+      intersection_size,
+      precision,
+      recall
+    )
+}
+
+# Top pathways for each gene set
+top_all  &lt;- format_gost(gost_all)
+top_up   &lt;- format_gost(gost_up)
+top_down &lt;- format_gost(gost_down)</code></pre>
+<p><br></p>
+<p><strong>All Differentially Expressed Genes</strong></p>
+<pre class="r"><code>knitr::kable(top_all, caption = &quot;Top enriched pathways for all significant genes&quot;)</code></pre>
+<table>
+<caption><span id="tab:unnamed-chunk-13">Table 2.1: </span>Top enriched pathways for all significant genes</caption>
+<colgroup>
+<col width="39%" />
+<col width="5%" />
+<col width="6%" />
+<col width="8%" />
+<col width="9%" />
+<col width="14%" />
+<col width="8%" />
+<col width="8%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">term_name</th>
+<th align="left">source</th>
+<th align="right">p_value</th>
+<th align="right">term_size</th>
+<th align="right">query_size</th>
+<th align="right">intersection_size</th>
+<th align="right">precision</th>
+<th align="right">recall</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">ribonucleoprotein complex biogenesis</td>
+<td align="left"><a href="GO:BP" class="uri">GO:BP</a></td>
+<td align="right">0e+00</td>
+<td align="right">402</td>
+<td align="right">12488</td>
+<td align="right">382</td>
+<td align="right">0.0305894</td>
+<td align="right">0.9502488</td>
+</tr>
+<tr class="even">
+<td align="left">cell cycle phase transition</td>
+<td align="left"><a href="GO:BP" class="uri">GO:BP</a></td>
+<td align="right">0e+00</td>
+<td align="right">457</td>
+<td align="right">12488</td>
+<td align="right">422</td>
+<td align="right">0.0337924</td>
+<td align="right">0.9234136</td>
+</tr>
+<tr class="odd">
+<td align="left">ribosome biogenesis</td>
+<td align="left"><a href="GO:BP" class="uri">GO:BP</a></td>
+<td align="right">0e+00</td>
+<td align="right">261</td>
+<td align="right">12488</td>
+<td align="right">250</td>
+<td align="right">0.0200192</td>
+<td align="right">0.9578544</td>
+</tr>
+<tr class="even">
+<td align="left">regulation of cellular response to stress</td>
+<td align="left"><a href="GO:BP" class="uri">GO:BP</a></td>
+<td align="right">0e+00</td>
+<td align="right">444</td>
+<td align="right">12488</td>
+<td align="right">408</td>
+<td align="right">0.0326714</td>
+<td align="right">0.9189189</td>
+</tr>
+<tr class="odd">
+<td align="left">RNA splicing</td>
+<td align="left"><a href="GO:BP" class="uri">GO:BP</a></td>
+<td align="right">0e+00</td>
+<td align="right">395</td>
+<td align="right">12488</td>
+<td align="right">366</td>
+<td align="right">0.0293081</td>
+<td align="right">0.9265823</td>
+</tr>
+<tr class="even">
+<td align="left">Cell cycle</td>
+<td align="left">KEGG</td>
+<td align="right">0e+00</td>
+<td align="right">157</td>
+<td align="right">6364</td>
+<td align="right">155</td>
+<td align="right">0.0243558</td>
+<td align="right">0.9872611</td>
+</tr>
+<tr class="odd">
+<td align="left">Ubiquitin mediated proteolysis</td>
+<td align="left">KEGG</td>
+<td align="right">0e+00</td>
+<td align="right">140</td>
+<td align="right">6364</td>
+<td align="right">138</td>
+<td align="right">0.0216845</td>
+<td align="right">0.9857143</td>
+</tr>
+<tr class="even">
+<td align="left">Autophagy - animal</td>
+<td align="left">KEGG</td>
+<td align="right">0e+00</td>
+<td align="right">165</td>
+<td align="right">6364</td>
+<td align="right">159</td>
+<td align="right">0.0249843</td>
+<td align="right">0.9636364</td>
+</tr>
+<tr class="odd">
+<td align="left">Protein processing in endoplasmic reticulum</td>
+<td align="left">KEGG</td>
+<td align="right">0e+00</td>
+<td align="right">168</td>
+<td align="right">6364</td>
+<td align="right">160</td>
+<td align="right">0.0251414</td>
+<td align="right">0.9523810</td>
+</tr>
+<tr class="even">
+<td align="left">Salmonella infection</td>
+<td align="left">KEGG</td>
+<td align="right">0e+00</td>
+<td align="right">249</td>
+<td align="right">6364</td>
+<td align="right">228</td>
+<td align="right">0.0358265</td>
+<td align="right">0.9156627</td>
+</tr>
+<tr class="odd">
+<td align="left">Transcriptional Regulation by TP53</td>
+<td align="left">REAC</td>
+<td align="right">0e+00</td>
+<td align="right">359</td>
+<td align="right">8545</td>
+<td align="right">349</td>
+<td align="right">0.0408426</td>
+<td align="right">0.9721448</td>
+</tr>
+<tr class="even">
+<td align="left">RHO GTPase cycle</td>
+<td align="left">REAC</td>
+<td align="right">0e+00</td>
+<td align="right">449</td>
+<td align="right">8545</td>
+<td align="right">426</td>
+<td align="right">0.0498537</td>
+<td align="right">0.9487751</td>
+</tr>
+<tr class="odd">
+<td align="left">Processing of Capped Intron-Containing Pre-mRNA</td>
+<td align="left">REAC</td>
+<td align="right">0e+00</td>
+<td align="right">276</td>
+<td align="right">8545</td>
+<td align="right">268</td>
+<td align="right">0.0313634</td>
+<td align="right">0.9710145</td>
+</tr>
+<tr class="even">
+<td align="left">mRNA Splicing</td>
+<td align="left">REAC</td>
+<td align="right">0e+00</td>
+<td align="right">209</td>
+<td align="right">8545</td>
+<td align="right">205</td>
+<td align="right">0.0239906</td>
+<td align="right">0.9808612</td>
+</tr>
+<tr class="odd">
+<td align="left">mRNA Splicing - Major Pathway</td>
+<td align="left">REAC</td>
+<td align="right">0e+00</td>
+<td align="right">202</td>
+<td align="right">8545</td>
+<td align="right">198</td>
+<td align="right">0.0231714</td>
+<td align="right">0.9801980</td>
+</tr>
+<tr class="even">
+<td align="left">VEGFA VEGFR2 signaling</td>
+<td align="left">WP</td>
+<td align="right">0e+00</td>
+<td align="right">430</td>
+<td align="right">6865</td>
+<td align="right">401</td>
+<td align="right">0.0584122</td>
+<td align="right">0.9325581</td>
+</tr>
+<tr class="odd">
+<td align="left">miR targeted genes in lymphocytes</td>
+<td align="left">WP</td>
+<td align="right">0e+00</td>
+<td align="right">421</td>
+<td align="right">6865</td>
+<td align="right">383</td>
+<td align="right">0.0557902</td>
+<td align="right">0.9097387</td>
+</tr>
+<tr class="even">
+<td align="left">DNA repair pathways full network</td>
+<td align="left">WP</td>
+<td align="right">0e+00</td>
+<td align="right">119</td>
+<td align="right">6865</td>
+<td align="right">117</td>
+<td align="right">0.0170430</td>
+<td align="right">0.9831933</td>
+</tr>
+<tr class="odd">
+<td align="left">Cell cycle</td>
+<td align="left">WP</td>
+<td align="right">0e+00</td>
+<td align="right">120</td>
+<td align="right">6865</td>
+<td align="right">118</td>
+<td align="right">0.0171886</td>
+<td align="right">0.9833333</td>
+</tr>
+<tr class="even">
+<td align="left">mRNA processing</td>
+<td align="left">WP</td>
+<td align="right">1e-07</td>
+<td align="right">126</td>
+<td align="right">6865</td>
+<td align="right">123</td>
+<td align="right">0.0179170</td>
+<td align="right">0.9761905</td>
+</tr>
+</tbody>
+</table>
+<p><br></p>
+<p><strong>Upregulated Differentially Expressed Genes</strong></p>
+<pre class="r"><code>knitr::kable(top_up, caption = &quot;Top enriched pathways for upregulated significant genes&quot;)</code></pre>
+<table style="width:100%;">
+<caption><span id="tab:unnamed-chunk-14">Table 2.2: </span>Top enriched pathways for upregulated significant genes</caption>
+<colgroup>
+<col width="46%" />
+<col width="4%" />
+<col width="6%" />
+<col width="6%" />
+<col width="7%" />
+<col width="12%" />
+<col width="6%" />
+<col width="6%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">term_name</th>
+<th align="left">source</th>
+<th align="right">p_value</th>
+<th align="right">term_size</th>
+<th align="right">query_size</th>
+<th align="right">intersection_size</th>
+<th align="right">precision</th>
+<th align="right">recall</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">regulation of cell projection organization</td>
+<td align="left"><a href="GO:BP" class="uri">GO:BP</a></td>
+<td align="right">0.0000000</td>
+<td align="right">467</td>
+<td align="right">6434</td>
+<td align="right">261</td>
+<td align="right">0.0405657</td>
+<td align="right">0.5588865</td>
+</tr>
+<tr class="even">
+<td align="left">regulation of plasma membrane bounded cell projection organization</td>
+<td align="left"><a href="GO:BP" class="uri">GO:BP</a></td>
+<td align="right">0.0000000</td>
+<td align="right">453</td>
+<td align="right">6434</td>
+<td align="right">254</td>
+<td align="right">0.0394778</td>
+<td align="right">0.5607064</td>
+</tr>
+<tr class="odd">
+<td align="left">actin filament organization</td>
+<td align="left"><a href="GO:BP" class="uri">GO:BP</a></td>
+<td align="right">0.0000000</td>
+<td align="right">399</td>
+<td align="right">6434</td>
+<td align="right">227</td>
+<td align="right">0.0352813</td>
+<td align="right">0.5689223</td>
+</tr>
+<tr class="even">
+<td align="left">regulation of neuron projection development</td>
+<td align="left"><a href="GO:BP" class="uri">GO:BP</a></td>
+<td align="right">0.0000000</td>
+<td align="right">281</td>
+<td align="right">6434</td>
+<td align="right">169</td>
+<td align="right">0.0262667</td>
+<td align="right">0.6014235</td>
+</tr>
+<tr class="odd">
+<td align="left">neuron projection morphogenesis</td>
+<td align="left"><a href="GO:BP" class="uri">GO:BP</a></td>
+<td align="right">0.0000000</td>
+<td align="right">443</td>
+<td align="right">6434</td>
+<td align="right">246</td>
+<td align="right">0.0382344</td>
+<td align="right">0.5553047</td>
+</tr>
+<tr class="even">
+<td align="left">Focal adhesion</td>
+<td align="left">KEGG</td>
+<td align="right">0.0000002</td>
+<td align="right">202</td>
+<td align="right">3182</td>
+<td align="right">118</td>
+<td align="right">0.0370836</td>
+<td align="right">0.5841584</td>
+</tr>
+<tr class="odd">
+<td align="left">Axon guidance</td>
+<td align="left">KEGG</td>
+<td align="right">0.0000003</td>
+<td align="right">181</td>
+<td align="right">3182</td>
+<td align="right">107</td>
+<td align="right">0.0336266</td>
+<td align="right">0.5911602</td>
+</tr>
+<tr class="even">
+<td align="left">Endocytosis</td>
+<td align="left">KEGG</td>
+<td align="right">0.0000053</td>
+<td align="right">248</td>
+<td align="right">3182</td>
+<td align="right">134</td>
+<td align="right">0.0421119</td>
+<td align="right">0.5403226</td>
+</tr>
+<tr class="odd">
+<td align="left">Efferocytosis</td>
+<td align="left">KEGG</td>
+<td align="right">0.0000731</td>
+<td align="right">156</td>
+<td align="right">3182</td>
+<td align="right">88</td>
+<td align="right">0.0276556</td>
+<td align="right">0.5641026</td>
+</tr>
+<tr class="even">
+<td align="left">Small cell lung cancer</td>
+<td align="left">KEGG</td>
+<td align="right">0.0001401</td>
+<td align="right">92</td>
+<td align="right">3182</td>
+<td align="right">56</td>
+<td align="right">0.0175990</td>
+<td align="right">0.6086957</td>
+</tr>
+<tr class="odd">
+<td align="left">Extracellular matrix organization</td>
+<td align="left">REAC</td>
+<td align="right">0.0000000</td>
+<td align="right">298</td>
+<td align="right">4286</td>
+<td align="right">175</td>
+<td align="right">0.0408306</td>
+<td align="right">0.5872483</td>
+</tr>
+<tr class="even">
+<td align="left">RHO GTPase cycle</td>
+<td align="left">REAC</td>
+<td align="right">0.0000000</td>
+<td align="right">449</td>
+<td align="right">4286</td>
+<td align="right">244</td>
+<td align="right">0.0569295</td>
+<td align="right">0.5434298</td>
+</tr>
+<tr class="odd">
+<td align="left">CDC42 GTPase cycle</td>
+<td align="left">REAC</td>
+<td align="right">0.0000123</td>
+<td align="right">155</td>
+<td align="right">4286</td>
+<td align="right">94</td>
+<td align="right">0.0219319</td>
+<td align="right">0.6064516</td>
+</tr>
+<tr class="even">
+<td align="left">RAC1 GTPase cycle</td>
+<td align="left">REAC</td>
+<td align="right">0.0002902</td>
+<td align="right">184</td>
+<td align="right">4286</td>
+<td align="right">104</td>
+<td align="right">0.0242650</td>
+<td align="right">0.5652174</td>
+</tr>
+<tr class="odd">
+<td align="left">Degradation of the extracellular matrix</td>
+<td align="left">REAC</td>
+<td align="right">0.0004683</td>
+<td align="right">140</td>
+<td align="right">4286</td>
+<td align="right">82</td>
+<td align="right">0.0191321</td>
+<td align="right">0.5857143</td>
+</tr>
+<tr class="even">
+<td align="left">VEGFA VEGFR2 signaling</td>
+<td align="left">WP</td>
+<td align="right">0.0002937</td>
+<td align="right">430</td>
+<td align="right">3443</td>
+<td align="right">218</td>
+<td align="right">0.0633169</td>
+<td align="right">0.5069767</td>
+</tr>
+<tr class="odd">
+<td align="left">Focal adhesion</td>
+<td align="left">WP</td>
+<td align="right">0.0002937</td>
+<td align="right">198</td>
+<td align="right">3443</td>
+<td align="right">112</td>
+<td align="right">0.0325298</td>
+<td align="right">0.5656566</td>
+</tr>
+<tr class="even">
+<td align="left">Small cell lung cancer</td>
+<td align="left">WP</td>
+<td align="right">0.0006222</td>
+<td align="right">95</td>
+<td align="right">3443</td>
+<td align="right">60</td>
+<td align="right">0.0174267</td>
+<td align="right">0.6315789</td>
+</tr>
+<tr class="odd">
+<td align="left">Integrin mediated cell adhesion</td>
+<td align="left">WP</td>
+<td align="right">0.0012552</td>
+<td align="right">101</td>
+<td align="right">3443</td>
+<td align="right">62</td>
+<td align="right">0.0180076</td>
+<td align="right">0.6138614</td>
+</tr>
+<tr class="even">
+<td align="left">Axon guidance</td>
+<td align="left">WP</td>
+<td align="right">0.0012841</td>
+<td align="right">72</td>
+<td align="right">3443</td>
+<td align="right">47</td>
+<td align="right">0.0136509</td>
+<td align="right">0.6527778</td>
+</tr>
+</tbody>
+</table>
+<p><br></p>
+<p><strong>Downregulated Differentially Expressed Genes</strong></p>
+<pre class="r"><code>knitr::kable(top_up, caption = &quot;Top enriched pathways for downregulated significant genes&quot;)</code></pre>
+<table style="width:100%;">
+<caption><span id="tab:unnamed-chunk-15">Table 2.3: </span>Top enriched pathways for downregulated significant genes</caption>
+<colgroup>
+<col width="46%" />
+<col width="4%" />
+<col width="6%" />
+<col width="6%" />
+<col width="7%" />
+<col width="12%" />
+<col width="6%" />
+<col width="6%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">term_name</th>
+<th align="left">source</th>
+<th align="right">p_value</th>
+<th align="right">term_size</th>
+<th align="right">query_size</th>
+<th align="right">intersection_size</th>
+<th align="right">precision</th>
+<th align="right">recall</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">regulation of cell projection organization</td>
+<td align="left"><a href="GO:BP" class="uri">GO:BP</a></td>
+<td align="right">0.0000000</td>
+<td align="right">467</td>
+<td align="right">6434</td>
+<td align="right">261</td>
+<td align="right">0.0405657</td>
+<td align="right">0.5588865</td>
+</tr>
+<tr class="even">
+<td align="left">regulation of plasma membrane bounded cell projection organization</td>
+<td align="left"><a href="GO:BP" class="uri">GO:BP</a></td>
+<td align="right">0.0000000</td>
+<td align="right">453</td>
+<td align="right">6434</td>
+<td align="right">254</td>
+<td align="right">0.0394778</td>
+<td align="right">0.5607064</td>
+</tr>
+<tr class="odd">
+<td align="left">actin filament organization</td>
+<td align="left"><a href="GO:BP" class="uri">GO:BP</a></td>
+<td align="right">0.0000000</td>
+<td align="right">399</td>
+<td align="right">6434</td>
+<td align="right">227</td>
+<td align="right">0.0352813</td>
+<td align="right">0.5689223</td>
+</tr>
+<tr class="even">
+<td align="left">regulation of neuron projection development</td>
+<td align="left"><a href="GO:BP" class="uri">GO:BP</a></td>
+<td align="right">0.0000000</td>
+<td align="right">281</td>
+<td align="right">6434</td>
+<td align="right">169</td>
+<td align="right">0.0262667</td>
+<td align="right">0.6014235</td>
+</tr>
+<tr class="odd">
+<td align="left">neuron projection morphogenesis</td>
+<td align="left"><a href="GO:BP" class="uri">GO:BP</a></td>
+<td align="right">0.0000000</td>
+<td align="right">443</td>
+<td align="right">6434</td>
+<td align="right">246</td>
+<td align="right">0.0382344</td>
+<td align="right">0.5553047</td>
+</tr>
+<tr class="even">
+<td align="left">Focal adhesion</td>
+<td align="left">KEGG</td>
+<td align="right">0.0000002</td>
+<td align="right">202</td>
+<td align="right">3182</td>
+<td align="right">118</td>
+<td align="right">0.0370836</td>
+<td align="right">0.5841584</td>
+</tr>
+<tr class="odd">
+<td align="left">Axon guidance</td>
+<td align="left">KEGG</td>
+<td align="right">0.0000003</td>
+<td align="right">181</td>
+<td align="right">3182</td>
+<td align="right">107</td>
+<td align="right">0.0336266</td>
+<td align="right">0.5911602</td>
+</tr>
+<tr class="even">
+<td align="left">Endocytosis</td>
+<td align="left">KEGG</td>
+<td align="right">0.0000053</td>
+<td align="right">248</td>
+<td align="right">3182</td>
+<td align="right">134</td>
+<td align="right">0.0421119</td>
+<td align="right">0.5403226</td>
+</tr>
+<tr class="odd">
+<td align="left">Efferocytosis</td>
+<td align="left">KEGG</td>
+<td align="right">0.0000731</td>
+<td align="right">156</td>
+<td align="right">3182</td>
+<td align="right">88</td>
+<td align="right">0.0276556</td>
+<td align="right">0.5641026</td>
+</tr>
+<tr class="even">
+<td align="left">Small cell lung cancer</td>
+<td align="left">KEGG</td>
+<td align="right">0.0001401</td>
+<td align="right">92</td>
+<td align="right">3182</td>
+<td align="right">56</td>
+<td align="right">0.0175990</td>
+<td align="right">0.6086957</td>
+</tr>
+<tr class="odd">
+<td align="left">Extracellular matrix organization</td>
+<td align="left">REAC</td>
+<td align="right">0.0000000</td>
+<td align="right">298</td>
+<td align="right">4286</td>
+<td align="right">175</td>
+<td align="right">0.0408306</td>
+<td align="right">0.5872483</td>
+</tr>
+<tr class="even">
+<td align="left">RHO GTPase cycle</td>
+<td align="left">REAC</td>
+<td align="right">0.0000000</td>
+<td align="right">449</td>
+<td align="right">4286</td>
+<td align="right">244</td>
+<td align="right">0.0569295</td>
+<td align="right">0.5434298</td>
+</tr>
+<tr class="odd">
+<td align="left">CDC42 GTPase cycle</td>
+<td align="left">REAC</td>
+<td align="right">0.0000123</td>
+<td align="right">155</td>
+<td align="right">4286</td>
+<td align="right">94</td>
+<td align="right">0.0219319</td>
+<td align="right">0.6064516</td>
+</tr>
+<tr class="even">
+<td align="left">RAC1 GTPase cycle</td>
+<td align="left">REAC</td>
+<td align="right">0.0002902</td>
+<td align="right">184</td>
+<td align="right">4286</td>
+<td align="right">104</td>
+<td align="right">0.0242650</td>
+<td align="right">0.5652174</td>
+</tr>
+<tr class="odd">
+<td align="left">Degradation of the extracellular matrix</td>
+<td align="left">REAC</td>
+<td align="right">0.0004683</td>
+<td align="right">140</td>
+<td align="right">4286</td>
+<td align="right">82</td>
+<td align="right">0.0191321</td>
+<td align="right">0.5857143</td>
+</tr>
+<tr class="even">
+<td align="left">VEGFA VEGFR2 signaling</td>
+<td align="left">WP</td>
+<td align="right">0.0002937</td>
+<td align="right">430</td>
+<td align="right">3443</td>
+<td align="right">218</td>
+<td align="right">0.0633169</td>
+<td align="right">0.5069767</td>
+</tr>
+<tr class="odd">
+<td align="left">Focal adhesion</td>
+<td align="left">WP</td>
+<td align="right">0.0002937</td>
+<td align="right">198</td>
+<td align="right">3443</td>
+<td align="right">112</td>
+<td align="right">0.0325298</td>
+<td align="right">0.5656566</td>
+</tr>
+<tr class="even">
+<td align="left">Small cell lung cancer</td>
+<td align="left">WP</td>
+<td align="right">0.0006222</td>
+<td align="right">95</td>
+<td align="right">3443</td>
+<td align="right">60</td>
+<td align="right">0.0174267</td>
+<td align="right">0.6315789</td>
+</tr>
+<tr class="odd">
+<td align="left">Integrin mediated cell adhesion</td>
+<td align="left">WP</td>
+<td align="right">0.0012552</td>
+<td align="right">101</td>
+<td align="right">3443</td>
+<td align="right">62</td>
+<td align="right">0.0180076</td>
+<td align="right">0.6138614</td>
+</tr>
+<tr class="even">
+<td align="left">Axon guidance</td>
+<td align="left">WP</td>
+<td align="right">0.0012841</td>
+<td align="right">72</td>
+<td align="right">3443</td>
+<td align="right">47</td>
+<td align="right">0.0136509</td>
+<td align="right">0.6527778</td>
+</tr>
+</tbody>
+</table>
+<p><br></p>
+<p>These ORA results are consistent with key mechanisms discussed in the original study on ADGRG6 function in human iAT2 cells <span class="citation">(<a href="#ref-werder2023adgrg6"><span class="nocase">Werder et al.</span> 2023</a>)</span>. Across multiple annotation databases, pathways related to ribosome biogenesis, RNA processing, and cell cycle regulation were among the most significantly enriched. These findings matches the original paper’s claim that perturbation of ADGRG6 impacts fundamental processes involved in protein synthesis and cell proliferation.</p>
+<p>For example, “ribonucleoprotein complex biogenesis” and “ribosome biogenesis” were the most significant <a href="GO:BP" class="uri">GO:BP</a> terms enriched among all significant genes. Ribosome biogenesis and proper assembly of ribonucleoprotein complexes are critical for maintaining translational capacity and cellular growth. In the context of alveolar epithelial cells, efficient protein synthesis is necessary for cell renewal and repair after injury. Dysregulation of ribosome biogenesis has been associated with altered proliferative states and impaired epithelial regeneration, consistent with the transcriptional changes observed following ADGRG6 knockdown <span class="citation">(<a href="#ref-prakash2019ribosome"><span class="nocase">Prakash et al.</span> 2019</a>)</span>.</p>
+<p>Similarly, enrichment of cell cycle–related pathways (e.g., “cell cycle phase transition”, “DNA replication”) indicates altered regulation of proliferation in ADGRG6‑perturbed cells. The original paper reported effects of ADGRG6 perturbation on cell proliferation and epithelial barrier integrity under cigarette smoke exposure. Indeed, recent work has shown that modulation of cell cycle pathways in alveolar type II cells influences their ability to proliferate and regenerate the epithelial barrier following lung injury, and disruptions in these programs contribute to impaired lung repair in disease contexts <span class="citation">(<a href="#ref-raby2023mechanisms">Raby et al. 2023</a>)</span>. These findings support the interpretation that loss of ADGRG6 function may disrupt proliferative signaling, potentially compromising epithelial homeostasis under stress.</p>
+<p>Protein processing pathways identified in KEGG (“protein processing in endoplasmic reticulum”) and Reactome (“Translation”, “Cap‑dependent translation initiation”) further suggest an impact on protein quality control and translational efficiency. The endoplasmic reticulum plays a central role in folding and processing of nascent proteins, especially under stress. Cigarette smoke induces endoplasmic reticulum stress in airway epithelial cells, and pathways identified here are consistent with a stress response that could be exacerbated by ADGRG6 knockdown <span class="citation">(<a href="#ref-raby2023mechanisms">Raby et al. 2023</a>)</span>.</p>
+<p>In summary, the ORA results not only recapitulate processes highlighted by the original study (cell structure, proliferation, and injury response) but also reveal additional biological themes, such as translation and ER stress pathways, that are supported by the broader literature on airway epithelial responses to cigarette smoke. These enriched pathways provide further evidence that ADGRG6 perturbation influences key biological processes relevant to COPD pathogenesis.</p>
+<hr />
+</div>
+</div>
+</div>
+<div id="gsea" class="section level1" number="3">
+<h1><span class="header-section-number">3</span> Non-thresholded Gene Set Enrichment Analysis (GSEA)</h1>
+<p>In this section, we perform <strong>non-thresholded gene set enrichment analysis (GSEA)</strong> to identify biological pathways enriched across the full ranked list of genes, without applying a significance cutoff. This approach complements the thresholded ORA by capturing coordinated changes in gene expression that may not reach statistical significance individually but act collectively within pathways.</p>
+<div id="gsea-setup" class="section level2" number="3.1">
+<h2><span class="header-section-number">3.1</span> Data Setup</h2>
+<p>The analysis was performed using the Gene Set Enrichment Analysis (GSEA) software, which implements a preranked GSEA algorithm. The <strong>ranked gene list</strong> was derived from the differential expression results for <strong>ADGRG6 knockdown vs. wild-type under air exposure</strong>, with ranking calculated as:</p>
+<p><span class="math display">\[
+\text{rank metric} = \text{sign}(\text{logFC}) \times -\log_{10}(\text{PValue})
+\]</span></p>
+<p>This metric prioritizes genes with both strong fold-changes and statistical significance.</p>
+<p>Below is the code used to generate ranking. Ranking was saved at data/my_ranked_genes.rnk :</p>
 <pre class="r"><code>ranked_list &lt;- tbl_wt_vs_kd_air %&gt;%
   # Calculate rank metric: sign(logFC) * -log10(PValue)
   mutate(
@@ -1831,31 +2806,21 @@ print(ranked_list)</code></pre>
 ##  9 ABCC2     7.04
 ## 10 LAMB1     7.01
 ## # ℹ 15,070 more rows</code></pre>
-<pre class="r"><code>write.table(ranked_list, 
-            file = &quot;my_ranked_genes.rnk&quot;, 
-            sep = &quot;\t&quot;,          # GSEA requires tab-separated values
-            row.names = FALSE,   # Prevents R from adding row numbers
-            col.names = FALSE,   # Removes column headers (recommended for GSEA)
-            quote = FALSE)</code></pre>
+<p><br></p>
+<p>A <strong>custom GMT file</strong> from Bader’s Lab was used for gene sets. File can be found at:</p>
+<p>data/Human_GOBP_AllPathways_noPFOCR_no_GO_iea_September_01_2025_symbol.gmt</p>
+<p>This custom gmt removes redundant parent or overlapping terms (noPFOCR) and excludes electronic annotations (no_GO_iea). This ensures that enriched pathways are specific, high-confidence, experimentally validated, and human-relevant, reducing noise and improving interpretability. Together, these filters enhance the robustness and consistency of results over time, so rerunning the analysis produces stable, biologically meaningful pathway enrichments.</p>
+</div>
+<div id="gsea_ana" class="section level2" number="3.2">
+<h2><span class="header-section-number">3.2</span> Data Analysis</h2>
 <hr />
 </div>
-<div id="threshold_result" class="section level2" number="2.2">
-<h2><span class="header-section-number">2.2</span> Result</h2>
+<div id="gsea_vis" class="section level2" number="3.3">
+<h2><span class="header-section-number">3.3</span> Visualization</h2>
 <hr />
 </div>
-</div>
-<div id="non_threshold" class="section level1" number="3">
-<h1><span class="header-section-number">3</span> Non-thresholded Gene set Enrichment Analysis</h1>
-<div id="non_threshold_ana" class="section level2" number="3.1">
-<h2><span class="header-section-number">3.1</span> Data Analysis</h2>
-<hr />
-</div>
-<div id="non_threshold_vis" class="section level2" number="3.2">
-<h2><span class="header-section-number">3.2</span> Visualization</h2>
-<hr />
-</div>
-<div id="non_threshold_result" class="section level2" number="3.3">
-<h2><span class="header-section-number">3.3</span> Result Analysis</h2>
+<div id="gsea_result" class="section level2" number="3.4">
+<h2><span class="header-section-number">3.4</span> Result Analysis</h2>
 <hr />
 </div>
 </div>
@@ -1868,16 +2833,65 @@ print(ranked_list)</code></pre>
 <div id="thresholded-over-representation-analysis" class="section level2" number="5.1">
 <h2><span class="header-section-number">5.1</span> Thresholded over-representation analysis</h2>
 <p><strong>Which method did you choose and why?</strong></p>
+<p><a href="#ora-method">Method</a></p>
 <p><strong>What annotation data did you use and why? What version of the annotation are you using?</strong></p>
+<p>Unable to use custom gmt as it is only available on web, but when loaded it showed parseError. Used gProfiler2 instead.</p>
+<pre class="r"><code># Create a dataframe of the annotation versions used in the analysis
+annotation_versions_df &lt;- data.frame(
+  Source = c(&quot;Ensembl (Gene Build)&quot;, &quot;GO:BP / CC / MF&quot;, &quot;KEGG&quot;, &quot;Reactome (REAC)&quot;, &quot;Human Protein Atlas&quot;, &quot;miRTarBase&quot;),
+  Version_Release = c(&quot;Release 113 (e113_eg59_p19)&quot;, &quot;2025-03-16&quot;, &quot;2024-01-22&quot;, &quot;2025-05-23&quot;, &quot;2024-10-19&quot;, &quot;Release 10.0&quot;)
+)
+
+# View the table
+knitr::kable(annotation_versions_df, caption = &quot;Annotation Dataset Versions&quot;)</code></pre>
+<table>
+<caption><span id="tab:unnamed-chunk-17">Table 5.1: </span>Annotation Dataset Versions</caption>
+<thead>
+<tr class="header">
+<th align="left">Source</th>
+<th align="left">Version_Release</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Ensembl (Gene Build)</td>
+<td align="left">Release 113 (e113_eg59_p19)</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="GO:BP" class="uri">GO:BP</a> / CC / MF</td>
+<td align="left">2025-03-16</td>
+</tr>
+<tr class="odd">
+<td align="left">KEGG</td>
+<td align="left">2024-01-22</td>
+</tr>
+<tr class="even">
+<td align="left">Reactome (REAC)</td>
+<td align="left">2025-05-23</td>
+</tr>
+<tr class="odd">
+<td align="left">Human Protein Atlas</td>
+<td align="left">2024-10-19</td>
+</tr>
+<tr class="even">
+<td align="left">miRTarBase</td>
+<td align="left">Release 10.0</td>
+</tr>
+</tbody>
+</table>
 <p><strong>How many genesets were returned with what thresholds?</strong></p>
+<p><a href="#ora-count">Counts</a></p>
 <p><strong>Run the analysis using the up-regulated set of genes, and the down-regulated set of genes separately. How do these results compare to using the whole list (i.e all differentially expressed genes together vs. the up-regulated and down regulated differentially expressed genes separately)?</strong></p>
-<p><strong>Do the over-representation results support conclusions or mechanism discussed in the original paper?</strong></p>
-<p><strong>Can you find evidence, i.e. publications, to support some of the results that you see. How does this evidence support your results.</strong></p>
+<p>When ORA was performed using the combined list of all significant genes, a greater number of enriched pathways was detected compared to analyses using up-regulated and down-regulated genes separately. For example, for Reactome, 473 pathways were enriched using all significant genes, compared with 345 for down-regulated genes and 43 for up-regulated genes (473 &gt; 345 + 43).</p>
+<p>The higher number of pathways identified in the combined analysis reflects the larger and more diverse gene set, which increases the probability that pathways containing both up- and down-regulated genes reach statistical significance. In contrast, analyzing genes separately highlights direction-specific enrichment, identifying pathways primarily associated with either transcriptional activation or repression. Consequently, the combined analysis provides a broader overview of affected biological processes, whereas separate analyses allow clearer interpretation of directional transcriptional responses associated with ADGRG6 perturbation.</p>
+<p><strong>Do the over-representation results support conclusions or mechanism discussed in the original paper? Can you find evidence, i.e. publications, to support some of the results that you see. How does this evidence support your results.</strong></p>
+<p><a href="#ora-discuss">Discussion</a></p>
 <hr />
 </div>
 <div id="non-thresholded-gene-set-enrichment-analysis" class="section level2" number="5.2">
 <h2><span class="header-section-number">5.2</span> Non-thresholded Gene set Enrichment Analysis</h2>
 <p><strong>What method did you use? What genesets did you use? Make sure to specify versions and cite your methods.</strong></p>
+<p><a href="#gsea-setup">Setup</a></p>
 <p><strong>How do these results compare to the results from the thresholded analysis in Assignment #2. Compare qualitatively. Is this a straight forward comparison? Why or why not?</strong></p>
 <p><strong>How many nodes and how many edges in the resulting map? What thresholds were used to create this map?</strong></p>
 <p><strong>What parameters did you use to annotate the network?</strong></p>
@@ -1887,9 +2901,8 @@ print(ranked_list)</code></pre>
 <hr />
 </div>
 </div>
-<div id="references" class="section level1" number="6">
-<h1><span class="header-section-number">6</span> References</h1>
-<p>Lukas. (n.d.). Close-up photo of lighted cigarette stick [Photograph]. Pexels. <a href="https://www.pexels.com/photo/close-up-photo-of-lighted-cigarette-stick-70088/" class="uri">https://www.pexels.com/photo/close-up-photo-of-lighted-cigarette-stick-70088/</a></p>
+<div id="references" class="section level1 unnumbered">
+<h1>References</h1>
 <div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-rmarkdown2023" class="csl-entry">
 Allaire, J. J., Y. Xie, J. McPherson, et al. 2023. <em>R Markdown: Dynamic Documents for r</em>. <a href="https://CRAN.R-project.org/package=rmarkdown">https://CRAN.R-project.org/package=rmarkdown</a>.
@@ -1935,6 +2948,12 @@ Müller, Kirill, and Hadley Wickham. 2023. <em>Tibble: Simple Data Frames</em>. 
 </div>
 <div id="ref-rcolorbrewer2023" class="csl-entry">
 Neuwirth, Erich. 2023. <em>RColorBrewer: ColorBrewer Palettes</em>. <a href="https://CRAN.R-project.org/package=RColorBrewer">https://CRAN.R-project.org/package=RColorBrewer</a>.
+</div>
+<div id="ref-prakash2019ribosome" class="csl-entry">
+<span class="nocase">Prakash, Vinay, Brandon B Carson, Justin S Feheley, et al.</span> 2019. <span>“Ribosome Biogenesis During Cell Cycle Arrest Fuels EMT in Development and Disease.”</span> <em>Nature Communications</em> 10 (1): 2110. <a href="https://doi.org/10.1038/s41467-019-10100-8">https://doi.org/10.1038/s41467-019-10100-8</a>.
+</div>
+<div id="ref-raby2023mechanisms" class="csl-entry">
+Raby, Katherine L, Chrysanthi Michaeloudes, Jack Tonkin, Kian Fan Chung, and Pankaj K Bhavsar. 2023. <span>“Mechanisms of Airway Epithelial Injury and Abnormal Repair in Asthma and COPD.”</span> <em>Frontiers in Immunology</em> 14: 1201658. <a href="https://doi.org/10.3389/fimmu.2023.1201658">https://doi.org/10.3389/fimmu.2023.1201658</a>.
 </div>
 <div id="ref-robinson2010edger" class="csl-entry">
 Robinson, Mark D, David J McCarthy, and Gordon K Smyth. 2010. <span>“edgeR: A Bioconductor Package for Differential Expression Analysis of Digital Gene Expression Data.”</span> <em>Bioinformatics</em> 26 (1): 139–40.

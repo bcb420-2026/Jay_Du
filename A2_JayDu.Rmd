@@ -47,6 +47,7 @@ library("RColorBrewer")
 library("rmarkdown")
 library("tidyr")
 library("tibble")
+library("gprofiler2")
 
 
 # Helper function for plotting modified based on lecture exercise
@@ -138,7 +139,7 @@ Differential expression analysis was then performed using the **edgeR quasi-like
 Statistical testing for differential expression was conducted using **quasi-likelihood F-tests** (`glmQLFTest()`), which evaluate predefined contrasts between experimental conditions. Several contrasts were defined, including **wild-type air vs. smoke exposure**, **ADGRG6 knockdown vs. wild-type under air exposure**, and **ADGRG6 knockdown with smoke vs. wild-type air**. For each comparison, genes were ranked based on their differential expression statistics, including log2 fold-change, average log-CPM, and quasi-likelihood F-statistics. P-values were adjusted for multiple testing using the **Benjamini–Hochberg false discovery rate (FDR)** procedure.
 
 
-To avoid retesting and save computational resource, result table was saved at "data/tbl_wt_vs_kd_air.rds". Sample data is shown as follows:
+To avoid retesting and save computational resource, resulting differential expression table was saved at "data/tbl_wt_vs_kd_air.rds". Sample data is shown as follows:
 
 ```{r}
 tbl_wt_vs_kd_air <- readRDS("data/tbl_wt_vs_kd_air.rds")
@@ -155,25 +156,284 @@ To view the full data exploration, quality control, and differential expression 
 ---
 
 
-# Thresholded over-representation analysis {#threshold}
+# Thresholded Over-Representation Analysis (ORA) {#ora}
 
-## Data Analysis {#threshold_ana}
+In this section, we perform thresholded over-representation analysis (ORA) to identify biological pathways enriched among significantly differentially expressed genes. ORA evaluates whether predefined gene sets occur more frequently in a list of significant genes than expected by chance. 
+
+## Method selection {#ora-method}
+
+The ORA was conducted using the **g:Profiler** tool (via the `gprofiler2` R package). This method was chosen because it is well-established for pathway enrichment analysis, integrates multiple annotation databases, and applies multiple testing correction (Benjamini–Hochberg FDR) to control for false positives. Additionally, g:Profiler provides outputs directly compatible with Cytoscape for downstream network visualization.
+
+## Annotation data {#ora-annotate}
+
+The analysis used the following curated annotation sources:
+
+- **GO Biological Process (GO:BP):** Captures biological pathways and cellular processes relevant to gene function. Selected because the study focuses on cellular responses such as adhesion, cytoskeletal organization, proliferation, and injury response.  
+- **KEGG:** Includes well-established signaling and metabolic pathways.  
+- **Reactome (REAC):** Provides detailed mechanistic pathways for signaling and metabolic processes.  
+- **WikiPathways (WP):** Community-curated pathways capturing emerging or specialized biological processes.
 
 
+## Data Analysis {ora-ana}
 
+We will started by pull out **HGNC** symbols from the list for g:profiler.
+
+```{r}
+# Fet all genes' HGNC symbol
+all_genes <- tbl_wt_vs_kd_air %>%
+  pull(hgnc_symbol)
+
+# Separate up- and down-regulated genes
+up_genes <- tbl_wt_vs_kd_air %>%
+  filter(logFC > 0) %>%
+  pull(hgnc_symbol)
+
+down_genes <- tbl_wt_vs_kd_air %>%
+  filter(logFC < 0) %>%
+  pull(hgnc_symbol)
+```
+
+Top 10 expressed genes from the whole list
+
+```{r}
+knitr::kable(
+  data.frame(HGNC_Symbol = head(all_genes, 10))
+)
+```
+
+Top 5 genes expressed from the upregulated list
+
+```{r}
+knitr::kable(
+  data.frame(HGNC_Symbol = head(up_genes, 5))
+)
+```
+
+Top 5 genes expressed from the downregulated list
+
+```{r}
+knitr::kable(
+  data.frame(HGNC_Symbol = head(down_genes, 5))
+)
+```
+
+<br>
+
+Now we perform ORA using **gprofiler2** for three gene sets: all differentially expressed genes, up-regulated genes, and down-regulated genes. As discussed previously (#ora-annotate), the analysis focuses on **GO Biological Process (GO:BP), KEGG, Reactome, and WikiPathways** annotations, as these databases capture pathway-level biological processes relevant to the functional effects of **ADGRG6** perturbation.
+
+Prior to enrichment analysis, genes were filtered using a significance threshold of **FDR < 0.05**. This threshold controls the false discovery rate after multiple testing correction and helps reduce background noise and false positives, ensuring that enrichment results reflect genuine biological responses rather than random variation.
+
+Additionally, **electronic GO annotations (IEA)** were excluded. IEA annotations are automatically inferred computationally rather than manually curated, and may include less reliable or overly broad gene-function associations. By excluding these annotations, the enrichment analysis focuses on **experimentally supported and curated pathways**, improving the reliability and interpretability of the results.
+
+Lastly, gene sets were filtered to include pathways containing 5–500 genes to improve the reliability of the ORA results. Very small gene sets can appear significant due to a few overlapping genes, while very large sets are often broad and less informative. Restricting pathway size focuses the analysis on well-defined biological processes with sufficient gene representation for robust enrichment.
+
+```{r}
+# Run enrichment for all genes
+gost_all <- gost(
+  query = all_genes,
+  organism = "hsapiens",
+  sources = c("GO:BP","KEGG","REAC","WP"),
+  user_threshold = 0.05,
+  correction_method = "fdr",
+  exclude_iea = TRUE,
+  significant = TRUE,
+)
+
+# Filter gene set size to 5-500
+gost_all$result <- gost_all$result %>%
+  filter(term_size > 5 & term_size < 500)
+
+# Run enrichment for up-regulated genes
+gost_up <- gost(
+  query = up_genes,
+  organism = "hsapiens",
+  sources = c("GO:BP","KEGG","REAC","WP"),
+  user_threshold = 0.05,
+  correction_method = "fdr",
+  exclude_iea = TRUE,
+  significant = TRUE,
+)
+
+# Filter gene set size to 5-500
+gost_up$result <- gost_up$result %>%
+  filter(term_size > 5 & term_size < 500)
+
+# Run enrichment for down-regulated genes
+gost_down <- gost(
+  query = down_genes,
+  organism = "hsapiens",
+  sources = c("GO:BP","KEGG","REAC","WP"),
+  user_threshold = 0.05,
+  correction_method = "fdr",
+  exclude_iea = TRUE,
+  significant = TRUE,
+)
+
+# Filter gene set size to 5-500
+gost_down$result <- gost_down$result %>%
+  filter(term_size > 5 & term_size < 500)
+```
 
 
 ---
 
-## Result {#threshold_result}
+## Result {#ora-result}
 
+### Gene set count {#ora-count}
+Let's first have a look at the number of significant gene sets for each annotation data:  
+
+<br>
+
+
+**GO:BP**
+
+```{r}
+# Extract and print the number of significant genesets returned for GO:BP
+cat("Significant GO:BP pathways for All Significant genes:", 
+    nrow(gost_all$result[gost_all$result$source == "GO:BP", ]), "\n")
+cat("Significant GO:BP pathways for Down-regulated genes:", 
+    nrow(gost_up$result[gost_up$result$source == "GO:BP", ]), "\n")
+cat("Significant GO:BP pathways for Up-regulated genes:", 
+    nrow(gost_down$result[gost_down$result$source == "GO:BP", ]), "\n")
+```
+
+<br>
+
+
+**Reactome**  
+
+```{r}
+# Extract and print the number of significant genesets returned for REAC
+cat("Significant Reactome pathways for All Significant genes:", 
+    nrow(gost_all$result[gost_all$result$source == "REAC", ]), "\n")
+cat("Significant Reactome pathways for Down-regulated genes:", 
+    nrow(gost_up$result[gost_up$result$source == "REAC", ]), "\n")
+cat("Significant Reactome pathways for Up-regulated genes:", 
+    nrow(gost_down$result[gost_down$result$source == "REAC", ]), "\n")
+```
+
+<br>
+
+
+**KEGG**  
+
+```{r}
+# Extract and print the number of significant genesets returned for KEGG
+cat("Significant KEGG pathways for All Significant genes:", 
+    nrow(gost_all$result[gost_all$result$source == "KEGG", ]), "\n")
+cat("Significant KEGG pathways for Down-regulated genes:", 
+    nrow(gost_up$result[gost_up$result$source == "KEGG", ]), "\n")
+cat("Significant KEGG pathways for Up-regulated genes:", 
+    nrow(gost_down$result[gost_down$result$source == "KEGG", ]), "\n")
+```
+
+<br>
+
+
+**WikiPathways**
+
+```{r}
+# Extract and print the number of significant genesets returned for WP
+cat("Significant WikiPathways for All Significant genes:", 
+    nrow(gost_all$result[gost_all$result$source == "WP", ]), "\n")
+cat("Significant WikiPathways for Down-regulated genes:", 
+    nrow(gost_up$result[gost_up$result$source == "WP", ]), "\n")
+cat("Significant WikiPathways for Up-regulated genes:", 
+    nrow(gost_down$result[gost_down$result$source == "WP", ]), "\n")
+```
+
+When ORA was performed using the combined list of all significant genes, a greater number of enriched pathways was detected compared to analyses using up-regulated and down-regulated genes separately. For example, for Reactome, 473 pathways were enriched using all significant genes, compared with 345 for down-regulated genes and 43 for up-regulated genes (473 > 345 + 43).  
+
+The higher number of pathways identified in the combined analysis reflects the larger and more diverse gene set, which increases the probability that pathways containing both up- and down-regulated genes reach statistical significance. In contrast, analyzing genes separately highlights direction-specific enrichment, identifying pathways primarily associated with either transcriptional activation or repression. Consequently, the combined analysis provides a broader overview of affected biological processes, whereas separate analyses allow clearer interpretation of directional transcriptional responses associated with ADGRG6 perturbation.
+
+<br>
+
+### ORA Result Discussion {#ora-discuss}
+
+Below are the top pathways with each three gene sets: all differentially expressed genes, up-regulated genes, and down-regulated genes
+
+```{r}
+# Function to format gost tables
+format_gost <- function(gost_obj) {
+  gost_obj$result %>%
+    arrange(p_value) %>%                 # sort by p-value
+    group_by(source) %>%                 # group by database
+    slice_head(n = 5) %>%                # top 5 per source
+    ungroup() %>%
+    select(
+      term_name,
+      source,
+      p_value,
+      term_size,
+      query_size,
+      intersection_size,
+      precision,
+      recall
+    )
+}
+
+# Top pathways for each gene set
+top_all  <- format_gost(gost_all)
+top_up   <- format_gost(gost_up)
+top_down <- format_gost(gost_down)
+```
+
+<br>
+
+
+**All Differentially Expressed Genes**
+
+```{r}
+knitr::kable(top_all, caption = "Top enriched pathways for all significant genes")
+```
+
+<br>
+
+
+**Upregulated Differentially Expressed Genes**
+
+```{r}
+knitr::kable(top_up, caption = "Top enriched pathways for upregulated significant genes")
+```
+
+<br>
+
+
+**Downregulated Differentially Expressed Genes** 
+
+```{r}
+knitr::kable(top_up, caption = "Top enriched pathways for downregulated significant genes")
+```
+
+<br>
+
+These ORA results are consistent with key mechanisms discussed in the original study on ADGRG6 function in human iAT2 cells [@werder2023adgrg6]. Across multiple annotation databases, pathways related to ribosome biogenesis, RNA processing, and cell cycle regulation were among the most significantly enriched. These findings matches the original paper's claim that perturbation of ADGRG6 impacts fundamental processes involved in protein synthesis and cell proliferation.
+
+For example, “ribonucleoprotein complex biogenesis” and “ribosome biogenesis” were the most significant GO:BP terms enriched among all significant genes. Ribosome biogenesis and proper assembly of ribonucleoprotein complexes are critical for maintaining translational capacity and cellular growth. In the context of alveolar epithelial cells, efficient protein synthesis is necessary for cell renewal and repair after injury. Dysregulation of ribosome biogenesis has been associated with altered proliferative states and impaired epithelial regeneration, consistent with the transcriptional changes observed following ADGRG6 knockdown [@prakash2019ribosome].
+
+Similarly, enrichment of cell cycle–related pathways (e.g., “cell cycle phase transition”, “DNA replication”) indicates altered regulation of proliferation in ADGRG6‑perturbed cells. The original paper reported effects of ADGRG6 perturbation on cell proliferation and epithelial barrier integrity under cigarette smoke exposure. Indeed, recent work has shown that modulation of cell cycle pathways in alveolar type II cells influences their ability to proliferate and regenerate the epithelial barrier following lung injury, and disruptions in these programs contribute to impaired lung repair in disease contexts [@raby2023mechanisms]. These findings support the interpretation that loss of ADGRG6 function may disrupt proliferative signaling, potentially compromising epithelial homeostasis under stress.
+
+Protein processing pathways identified in KEGG (“protein processing in endoplasmic reticulum”) and Reactome (“Translation”, “Cap‑dependent translation initiation”) further suggest an impact on protein quality control and translational efficiency. The endoplasmic reticulum plays a central role in folding and processing of nascent proteins, especially under stress. Cigarette smoke induces endoplasmic reticulum stress in airway epithelial cells, and pathways identified here are consistent with a stress response that could be exacerbated by ADGRG6 knockdown [@raby2023mechanisms].
+
+In summary, the ORA results not only recapitulate processes highlighted by the original study (cell structure, proliferation, and injury response) but also reveal additional biological themes, such as translation and ER stress pathways, that are supported by the broader literature on airway epithelial responses to cigarette smoke. These enriched pathways provide further evidence that ADGRG6 perturbation influences key biological processes relevant to COPD pathogenesis.
 
 ---
 
-# Non-thresholded Gene set Enrichment Analysis {#non_threshold}
+# Non-thresholded Gene Set Enrichment Analysis (GSEA) {#gsea}
 
-## Data Analysis {#non_threshold_ana}
+In this section, we perform **non-thresholded gene set enrichment analysis (GSEA)** to identify biological pathways enriched across the full ranked list of genes, without applying a significance cutoff. This approach complements the thresholded ORA by capturing coordinated changes in gene expression that may not reach statistical significance individually but act collectively within pathways.
 
+## Data Setup {#gsea-setup}
+
+The analysis was performed using the Gene Set Enrichment Analysis (GSEA) software, which implements a preranked GSEA algorithm. The **ranked gene list** was derived from the differential expression results for **ADGRG6 knockdown vs. wild-type under air exposure**, with ranking calculated as:
+
+\[
+\text{rank metric} = \text{sign}(\text{logFC}) \times -\log_{10}(\text{PValue})
+\]
+
+This metric prioritizes genes with both strong fold-changes and statistical significance.  
+
+Below is the code used to generate ranking. Ranking was saved at data/my_ranked_genes.rnk :
 ```{r}
 ranked_list <- tbl_wt_vs_kd_air %>%
   # Calculate rank metric: sign(logFC) * -log10(PValue)
@@ -193,22 +453,31 @@ ranked_list <- tbl_wt_vs_kd_air %>%
 # View the output
 print(ranked_list)
 ```
-```{r}
-write.table(ranked_list, 
-            file = "my_ranked_genes.rnk", 
-            sep = "\t",          # GSEA requires tab-separated values
-            row.names = FALSE,   # Prevents R from adding row numbers
-            col.names = FALSE,   # Removes column headers (recommended for GSEA)
-            quote = FALSE)
-```
+
+<br>
+
+A **custom GMT file** from Bader's Lab was used for gene sets. File can be found at:   
+
+data/Human_GOBP_AllPathways_noPFOCR_no_GO_iea_September_01_2025_symbol.gmt  
+
+This custom gmt removes redundant parent or overlapping terms (noPFOCR) and excludes electronic annotations (no_GO_iea). This ensures that enriched pathways are specific, high-confidence, experimentally validated, and human-relevant, reducing noise and improving interpretability. Together, these filters enhance the robustness and consistency of results over time, so rerunning the analysis produces stable, biologically meaningful pathway enrichments.
+
+
+## Data Analysis {#gsea_ana}
+
+
+
+
+
+
 
 ---
 
-## Visualization {#non_threshold_vis}
+## Visualization {#gsea_vis}
 
 ---
 
-## Result Analysis {#non_threshold_result}
+## Result Analysis {#gsea_result}
 
 
 ---
@@ -224,23 +493,50 @@ write.table(ranked_list,
 
 **Which method did you choose and why?**
 
-**What annotation data did you use and why? What version of the annotation are you using?**
+[Method](#ora-method)  
 
-**How many genesets were returned with what thresholds?**
+**What annotation data did you use and why? What version of the annotation are you using?**  
 
-**Run the analysis using the up-regulated set of genes, and the down-regulated set of genes separately. How do these results compare to using the whole list (i.e all differentially expressed genes together vs. the up-regulated and down regulated differentially expressed genes separately)?**
+Unable to use custom gmt as it is only available on web, but when loaded it showed parseError. Used gProfiler2 instead.  
 
-**Do the over-representation results support conclusions or mechanism discussed in the original paper?**
+```{r}
+# Create a dataframe of the annotation versions used in the analysis
+annotation_versions_df <- data.frame(
+  Source = c("Ensembl (Gene Build)", "GO:BP / CC / MF", "KEGG", "Reactome (REAC)", "Human Protein Atlas", "miRTarBase"),
+  Version_Release = c("Release 113 (e113_eg59_p19)", "2025-03-16", "2024-01-22", "2025-05-23", "2024-10-19", "Release 10.0")
+)
 
-**Can you find evidence, i.e. publications, to support some of the results that you see. How does this evidence support your results.**
+# View the table
+knitr::kable(annotation_versions_df, caption = "Annotation Dataset Versions")
+```
+
+
+**How many genesets were returned with what thresholds?**  
+
+[Counts](#ora-count)  
+
+
+**Run the analysis using the up-regulated set of genes, and the down-regulated set of genes separately. How do these results compare to using the whole list (i.e all differentially expressed genes together vs. the up-regulated and down regulated differentially expressed genes separately)?**  
+
+When ORA was performed using the combined list of all significant genes, a greater number of enriched pathways was detected compared to analyses using up-regulated and down-regulated genes separately. For example, for Reactome, 473 pathways were enriched using all significant genes, compared with 345 for down-regulated genes and 43 for up-regulated genes (473 > 345 + 43).  
+
+The higher number of pathways identified in the combined analysis reflects the larger and more diverse gene set, which increases the probability that pathways containing both up- and down-regulated genes reach statistical significance. In contrast, analyzing genes separately highlights direction-specific enrichment, identifying pathways primarily associated with either transcriptional activation or repression. Consequently, the combined analysis provides a broader overview of affected biological processes, whereas separate analyses allow clearer interpretation of directional transcriptional responses associated with ADGRG6 perturbation.
+
+**Do the over-representation results support conclusions or mechanism discussed in the original paper? Can you find evidence, i.e. publications, to support some of the results that you see. How does this evidence support your results.**
+
+[Discussion](#ora-discuss)
 
 ---
 
 ## Non-thresholded Gene set Enrichment Analysis
 
-**What method did you use? What genesets did you use? Make sure to specify versions and cite your methods.**
+**What method did you use? What genesets did you use? Make sure to specify versions and cite your methods.**  
+
+[Setup](#gsea-setup)  
 
 **How do these results compare to the results from the thresholded analysis in Assignment #2. Compare qualitatively. Is this a straight forward comparison? Why or why not?**
+
+
 
 **How many nodes and how many edges in the resulting map? What thresholds were used to create this map?**
 
